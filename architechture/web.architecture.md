@@ -23,7 +23,7 @@ flowchart TD
 
     E -.->|Embeddings for storing & searching| D
     E -.->|Embeddings for storing & searching| G
-    I -->|LLM Call| J["Groq API — llama-3.1-8b-instant"]
+    I -->|LLM Call| J["Groq API — openai/gpt-oss-20b"]
     J --> K["Final Answer"]
 
     subgraph ORCHESTRATOR["Orchestration"]
