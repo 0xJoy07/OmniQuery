@@ -1,6 +1,6 @@
 import os
 from langchain_chroma import Chroma
-from embed import get_embedding_model
+from .embed import get_embedding_model
 
 DB_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..", "db", "youtube_chroma")
