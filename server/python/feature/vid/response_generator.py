@@ -24,20 +24,34 @@ def generate_response(question, context_docs):
     )
 
     prompt = f"""
-You are an AI assistant that answers questions about YouTube videos.
+    You are an AI assistant that answers questions about YouTube videos.
 
-Use only the transcript context provided below.
+    Use only the transcript context provided below.
 
-If the answer cannot be found in the transcript, clearly say that
-the information is not available in the video.
+    If the answer cannot be found in the transcript, clearly say that
+    the information is not available in the video.
 
-Transcript context:
-{context}
+    Transcript context:
+    {context}
 
-Question:
-{question}
+    Question:
+    {question}
 
-Answer:
+    Answer:
+
+    ---
+
+    After answering, generate 2-3 follow-up questions the user might want to explore next, based strictly on the transcript context above.
+
+    Rules for follow-up questions:
+    - Each question must be answerable from the transcript context
+    - Do not introduce topics outside the transcript
+    - Keep questions concise and curiosity-driven
+
+    Follow-up Questions:
+    1.
+    2.
+    3.
 """
 
     response = llm.invoke(prompt)

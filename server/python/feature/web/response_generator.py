@@ -18,13 +18,31 @@ def generate_response(question, context_docs):
 
     context = "\n\n".join(doc.page_content for doc in context_docs)
 
-    prompt = f"""Based on the following context from a website, answer the question.
+    prompt = f"""
+    Based on the following context from a website, answer the question.
+    
+    Use only the context provided below.
+    
+    If the answer cannot be found in the context, clearly say that the information is not available.
 
-                Context: {context}
+    Context: {context}
 
-                Question: {question}
+    Question: {question}
 
-                Answer:"""
+    Answer:
+
+    After answering, generate 2-3 follow-up questions the user might want to explore next, based strictly on the context provided above.
+
+    Rules for follow-up questions:
+    - Each question must be answerable from the given context
+    - Do not introduce topics outside the context
+    - Keep questions concise and curiosity-driven
+
+    Follow-up Questions:
+    1.
+    2.
+    3.
+    """
 
     response = llm.invoke(prompt)
     return response.content
