@@ -20,12 +20,11 @@ def generate_response(question, context_docs):
 
     prompt = f"""Based on the following context from a website, answer the question.
 
-Context:
-{context}
+                Context: {context}
 
-Question: {question}
+                Question: {question}
 
-Answer:"""
+                Answer:"""
 
     response = llm.invoke(prompt)
     return response.content
