@@ -5,3 +5,5 @@ langchain-chroma
 langchain-groq
 pypdf
 python-dotenv
+youtube-transcript-api
+langchain-core
