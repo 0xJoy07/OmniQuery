@@ -19,7 +19,6 @@ def extract_youtube_video_id(url: str) -> str | None:
 
 
 def load_youtube_transcript(url: str):
-    """Fetch a YouTube transcript and return LangChain documents."""
 
     video_id = extract_youtube_video_id(url)
 

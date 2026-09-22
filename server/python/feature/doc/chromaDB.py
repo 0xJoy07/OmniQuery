@@ -10,7 +10,6 @@ DB_PATH = os.path.abspath(
 
 
 def save_to_chroma(chunks):
-    """Save document chunks to ChromaDB vector store."""
 
     vector_db = Chroma.from_documents(
         documents=chunks,
@@ -20,10 +19,7 @@ def save_to_chroma(chunks):
 
     return vector_db
 
-
 def load_chroma():
-    """Load the existing ChromaDB vector store."""
-
     return Chroma(
         persist_directory=DB_PATH,
         embedding_function=get_embedding_model()

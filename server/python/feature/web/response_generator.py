@@ -5,7 +5,6 @@ from langchain_groq import ChatGroq
 
 
 def generate_response(question, context_docs):
-    """Generate a response using Groq LLM based on retrieved context."""
     load_dotenv()
     api_key = os.getenv("GROQ_API_KEY")
 

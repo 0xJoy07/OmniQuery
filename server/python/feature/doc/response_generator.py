@@ -5,7 +5,6 @@ from langchain_groq import ChatGroq
 
 
 def generate_response(question, context_docs):
-    """Generate an answer using the Groq LLM based on document context."""
 
     load_dotenv()
 

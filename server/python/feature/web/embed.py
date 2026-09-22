@@ -5,7 +5,6 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings as Embed
 
 
 def get_embedding_model():
-    """Return the Google Generative AI embedding model."""
     load_dotenv()
     api_key = os.getenv("GOOGLE_API_KEY")
 

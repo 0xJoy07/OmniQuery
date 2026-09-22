@@ -32,7 +32,6 @@ SUPPORTED_EXTENSIONS = {
 
 
 def get_loader(file_path, ext):
-    """Return the appropriate loader based on file extension."""
 
     if ext == ".pdf":
         return PyPDFLoader(file_path)
@@ -66,7 +65,6 @@ def get_loader(file_path, ext):
 
 
 def load_document(file_path):
-    """Load any supported document and return LangChain documents."""
 
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")

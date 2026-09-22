@@ -5,7 +5,6 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 
 def get_embedding_model():
-    """Return the Google Generative AI embedding model."""
 
     load_dotenv()
 

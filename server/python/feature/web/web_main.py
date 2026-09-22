@@ -5,14 +5,6 @@ from .response_generator import generate_response
 
 
 def web_pipeline(url, question):
-    """
-    Full web RAG pipeline:
-    1. Load webpage content
-    2. Chunk documents
-    3. Save to ChromaDB
-    4. Retrieve relevant context
-    5. Generate response using Groq LLM
-    """
     # Load and process the webpage
     docs = webLoader(url)
     chunks = chunk_docs(docs)

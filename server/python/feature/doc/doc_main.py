@@ -5,14 +5,6 @@ from .response_generator import generate_response
 
 
 def doc_pipeline(file_path, question):
-    """
-    Full document RAG pipeline:
-    1. Load document (PDF, Word, PPT, Excel, CSV, TXT, JSON, MD, HTML)
-    2. Chunk documents
-    3. Save to ChromaDB
-    4. Retrieve relevant context
-    5. Generate response using Groq LLM
-    """
 
     docs = load_document(file_path)
     chunks = chunk_docs(docs)
