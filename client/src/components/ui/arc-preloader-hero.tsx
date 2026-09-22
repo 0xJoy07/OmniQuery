@@ -92,13 +92,13 @@ export function ArcRevealHero({
   // Honor reduced-motion + replay-suppression on mount.
   React.useEffect(() => {
     if (prefersReducedMotion) {
-      setPhase("done");
+      queueMicrotask(() => setPhase("done"));
       return;
     }
     if (storageKey && typeof window !== "undefined") {
       try {
         if (window.sessionStorage.getItem(storageKey) === "done") {
-          setPhase("done");
+          queueMicrotask(() => setPhase("done"));
         }
       } catch {
         /* sessionStorage can throw in private mode — fall through */
