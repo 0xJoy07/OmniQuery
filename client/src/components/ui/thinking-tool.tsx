@@ -23,7 +23,7 @@ const SHIMMER_STYLES = `
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  background-image: linear-gradient(90deg, #a3a3a3 0%, #a3a3a3 40%, #525252 50%, #a3a3a3 60%, #a3a3a3 100%);
+  background-image: linear-gradient(90deg, #FF6B2C 0%, #FF6B2C 40%, #ffffff 50%, #FF6B2C 60%, #FF6B2C 100%);
   background-repeat: no-repeat;
   animation: an-thinking-shimmer 1.2s linear infinite;
 }
@@ -99,7 +99,7 @@ export const ThinkingTool = React.memo(function ThinkingTool({
           canToggle ? "cursor-pointer" : "cursor-default",
         )}
       >
-        <div className="flex items-center gap-2 min-w-0 text-sm text-neutral-500 dark:text-neutral-400">
+        <div className="flex items-center gap-2 min-w-0 text-sm text-[#FF6B2C] font-mono">
           <span className="font-[450] whitespace-nowrap shrink-0">
             {isAnimating ? (
               <span className="an-thinking-shimmer">Thinking</span>
@@ -111,7 +111,7 @@ export const ThinkingTool = React.memo(function ThinkingTool({
         {expandable && (
           <IconChevronRight
             className={cn(
-              "shrink-0 text-neutral-500 dark:text-neutral-400 transition-transform duration-150 ease-out size-3",
+              "shrink-0 text-[#FF6B2C] transition-transform duration-150 ease-out size-3",
               isOpen ? "rotate-90" : "rotate-0",
             )}
           />
@@ -119,8 +119,8 @@ export const ThinkingTool = React.memo(function ThinkingTool({
       </button>
       {expandable && isOpen && (
         <div className="overflow-hidden">
-          <div className="max-h-[175px] overflow-y-auto">
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 whitespace-pre-wrap">
+          <div className="max-h-[175px] overflow-y-auto mt-2">
+            <p className="text-sm text-neutral-400 font-mono whitespace-pre-wrap">
               {content}
             </p>
           </div>

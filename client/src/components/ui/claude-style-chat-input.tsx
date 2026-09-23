@@ -247,80 +247,95 @@ export const ClaudeChatInput: React.FC<ClaudeChatInputProps> = ({ onSendMessage 
 
     return (
         <div
-            className={`relative w-full max-w-2xl mx-auto transition-all duration-300 font-sans`}
+            className={`relative w-full max-w-2xl mx-auto transition-all duration-300 font-mono`}
             onDragOver={onDragOver}
             onDragLeave={onDragLeave}
             onDrop={onDrop}
         >
             <div className={`
-                !box-content flex flex-col mx-2 md:mx-0 items-stretch transition-all duration-200 relative z-10 rounded-2xl cursor-text border border-bg-300 dark:border-transparent 
-                shadow-[0_0_15px_rgba(0,0,0,0.08)] hover:shadow-[0_0_20px_rgba(0,0,0,0.12)]
-                focus-within:shadow-[0_0_25px_rgba(0,0,0,0.15)]
-                bg-white dark:bg-[#30302E] font-sans antialiased
-            `}>
+                !box-content flex flex-col mx-2 md:mx-0 items-stretch transition-all duration-300 relative z-10 rounded-xl cursor-text 
+                border border-transparent bg-origin-border
+                shadow-[inset_0_1px_0_rgba(255,107,44,0.15),_0_0_40px_rgba(255,107,44,0.06)]
+                font-mono antialiased
+            `}
+            style={{
+                background: 'linear-gradient(to bottom right, #2a1208, #1a0d05, #0f0a08) padding-box, linear-gradient(to bottom right, rgba(255,107,44,0.6), rgba(255,107,44,0.1), transparent) border-box'
+            }}>
 
                 <div className="flex flex-col px-3 pt-3 pb-2 gap-2">
 
                     {/* Tabs for Sources */}
-                    <div className="flex items-center gap-1 mb-2 px-1 border-b border-bg-300 dark:border-[#454540] pb-2">
-                        <button
-                            onClick={() => setSelectedSource('document')}
-                            className={`flex flex-1 sm:flex-none items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedSource === 'document' ? 'bg-bg-200 dark:bg-[#454540] text-text-100' : 'text-text-400 hover:text-text-200 hover:bg-bg-100 dark:hover:bg-[#383836]'}`}
-                        >
-                            <Icons.FileText className="w-4 h-4" />
-                            Document
-                        </button>
-                        <button
-                            onClick={() => setSelectedSource('website')}
-                            className={`flex flex-1 sm:flex-none items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedSource === 'website' ? 'bg-bg-200 dark:bg-[#454540] text-text-100' : 'text-text-400 hover:text-text-200 hover:bg-bg-100 dark:hover:bg-[#383836]'}`}
-                        >
-                            <Icons.Globe className="w-4 h-4" />
-                            Website
-                        </button>
-                        <button
-                            onClick={() => setSelectedSource('youtube')}
-                            className={`flex flex-1 sm:flex-none items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedSource === 'youtube' ? 'bg-bg-200 dark:bg-[#454540] text-text-100' : 'text-text-400 hover:text-text-200 hover:bg-bg-100 dark:hover:bg-[#383836]'}`}
-                        >
-                            <Icons.Youtube className="w-4 h-4" />
-                            YouTube
-                        </button>
+                    <div className="flex items-center gap-2 mb-2 px-1 pb-2 border-b-2 border-transparent" style={{ borderImage: 'linear-gradient(to right, rgba(255,107,44,0.2), transparent) 1' }}>
+                        {['document', 'website', 'youtube'].map((source) => (
+                            <button
+                                key={source}
+                                onClick={() => setSelectedSource(source as any)}
+                                className={`relative flex flex-1 sm:flex-none items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium transition-colors duration-150 ${selectedSource === source ? 'text-[#FF6B2C]' : 'text-white/40 hover:text-white/60'}`}
+                            >
+                                {source === 'document' && <Icons.FileText className="w-4 h-4" />}
+                                {source === 'website' && <Icons.Globe className="w-4 h-4" />}
+                                {source === 'youtube' && <Icons.Youtube className="w-4 h-4" />}
+                                <span className="capitalize">{source}</span>
+                                
+                                {/* Animated active underline */}
+                                {selectedSource === source && (
+                                    <span className="absolute bottom-[-11px] left-0 right-0 h-[2px] bg-gradient-to-r from-[#FF6B2C] to-[#FF9D70] animate-[scaleX_200ms_ease-out] origin-left" style={{ animationName: 'scaleX', animationDuration: '200ms', animationFillMode: 'forwards' }} />
+                                )}
+                            </button>
+                        ))}
                     </div>
+                    <style>{`
+                        @keyframes scaleX {
+                            from { transform: scaleX(0); }
+                            to { transform: scaleX(1); }
+                        }
+                        @keyframes bounce-twice {
+                            0%, 100% { transform: translateY(0); }
+                            50% { transform: translateY(-4px); }
+                        }
+                        @keyframes fade-in-delayed {
+                            0% { opacity: 0; }
+                            100% { opacity: 1; }
+                        }
+                        .animate-bounce-twice { animation: bounce-twice 400ms ease-in-out 2; }
+                    `}</style>
 
                     {/* Dynamic Source Input Zones */}
                     <div className="px-1 mb-2">
                         {selectedSource === 'document' && (
                             <div 
                                 onClick={() => fileInputRef.current?.click()}
-                                className="w-full border-2 border-dashed border-bg-300 dark:border-[#454540] hover:border-accent hover:bg-accent/5 dark:hover:bg-accent/10 transition-colors rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer text-text-400 group"
+                                className={`w-full border-2 border-dashed transition-all duration-300 rounded-md p-4 flex flex-col items-center justify-center cursor-pointer text-white/40 group overflow-hidden relative bg-gradient-to-br from-[#FF6B2C]/5 to-transparent hover:from-[#FF6B2C]/10 hover:to-transparent hover:scale-[1.005]
+                                    ${isDragging ? 'border-[#FF6B2C] border-solid bg-[#FF6B2C]/10' : 'border-[#FF6B2C]/40'}`}
                             >
-                                <Icons.Archive className="w-6 h-6 mb-2 group-hover:text-accent transition-colors" />
-                                <span className="text-sm font-medium group-hover:text-accent transition-colors">Click to browse or drag and drop</span>
-                                <span className="text-xs mt-1 opacity-70">Supports PDF, Markdown, Images...</span>
+                                <Icons.Archive className="w-6 h-6 mb-2 group-hover:text-[#FF6B2C] transition-colors duration-300 group-hover:animate-bounce-twice relative z-10" />
+                                <span className="text-sm font-medium group-hover:text-white transition-colors duration-300 relative z-10">Click to browse or drag and drop</span>
+                                <span className="text-xs mt-1 opacity-70 relative z-10">Supports PDF, Markdown, Images...</span>
                             </div>
                         )}
                         {selectedSource === 'website' && (
-                            <div className="w-full bg-bg-200 dark:bg-[#2A2A28] rounded-xl px-3 py-2 flex items-center gap-2 border border-transparent focus-within:border-accent/50 transition-colors">
-                                <Icons.Globe className="w-4 h-4 text-text-400" />
+                            <div className="w-full bg-transparent rounded-md px-3 py-2 flex items-center gap-2 border border-[#FF6B2C]/30 focus-within:border-[#FF6B2C] transition-colors">
+                                <Icons.Globe className="w-4 h-4 text-neutral-400" />
                                 <input 
                                     type="url"
                                     placeholder="Paste website URL here..."
                                     value={urlInput}
                                     onChange={(e) => setUrlInput(e.target.value)}
                                     onKeyDown={handleKeyDown}
-                                    className="bg-transparent border-none outline-none w-full text-sm text-text-100 placeholder:text-text-400"
+                                    className="bg-transparent border-none outline-none w-full text-sm text-white placeholder:text-neutral-500"
                                 />
                             </div>
                         )}
                         {selectedSource === 'youtube' && (
-                            <div className="w-full bg-bg-200 dark:bg-[#2A2A28] rounded-xl px-3 py-2 flex items-center gap-2 border border-transparent focus-within:border-accent/50 transition-colors">
-                                <Icons.Youtube className="w-4 h-4 text-text-400" />
+                            <div className="w-full bg-transparent rounded-md px-3 py-2 flex items-center gap-2 border border-[#FF6B2C]/30 focus-within:border-[#FF6B2C] transition-colors">
+                                <Icons.Youtube className="w-4 h-4 text-neutral-400" />
                                 <input 
                                     type="url"
                                     placeholder="Paste YouTube URL here..."
                                     value={urlInput}
                                     onChange={(e) => setUrlInput(e.target.value)}
                                     onKeyDown={handleKeyDown}
-                                    className="bg-transparent border-none outline-none w-full text-sm text-text-100 placeholder:text-text-400"
+                                    className="bg-transparent border-none outline-none w-full text-sm text-white placeholder:text-neutral-500"
                                 />
                             </div>
                         )}
@@ -347,8 +362,8 @@ export const ClaudeChatInput: React.FC<ClaudeChatInputProps> = ({ onSendMessage 
                     )}
 
                     {/* Main Text Input Area */}
-                    <div className="relative mb-1">
-                        <div className="max-h-96 w-full overflow-y-auto custom-scrollbar font-sans break-words transition-opacity duration-200 min-h-[2.5rem] pl-1">
+                    <div className="relative mb-1 group/input">
+                        <div className="max-h-96 w-full overflow-y-auto custom-scrollbar font-mono break-words transition-all duration-200 min-h-[2.5rem] pl-1 rounded-sm focus-within:bg-gradient-to-t focus-within:from-[#FF6B2C]/5 focus-within:to-transparent">
                             <textarea
                                 ref={textareaRef}
                                 value={message}
@@ -356,29 +371,38 @@ export const ClaudeChatInput: React.FC<ClaudeChatInputProps> = ({ onSendMessage 
                                 onPaste={handlePaste}
                                 onKeyDown={handleKeyDown}
                                 placeholder="How can I help you today?"
-                                className="w-full bg-transparent border-0 outline-none text-text-100 text-[16px] placeholder:text-text-400 resize-none overflow-hidden py-0 leading-relaxed block font-normal antialiased"
+                                className="w-full bg-transparent border-0 outline-none text-white text-[14px] placeholder:text-transparent focus:placeholder:text-white/25 resize-none overflow-hidden py-0 leading-relaxed block font-normal antialiased transition-all"
                                 rows={1}
                                 autoFocus
-                                style={{ minHeight: '1.5em' }}
+                                style={{ 
+                                    minHeight: '1.5em',
+                                    animation: 'fade-in-delayed 400ms ease-out 400ms forwards'
+                                }}
                             />
+                            {/* Static placeholder before focus */}
+                            {!message && (
+                                <span className="absolute top-0 left-1 text-white/25 text-[14px] pointer-events-none opacity-0" style={{ animation: 'fade-in-delayed 400ms ease-out 400ms forwards' }}>
+                                    How can I help you today?
+                                </span>
+                            )}
                         </div>
                     </div>
 
                     {/* Bottom Action Bar */}
-                    <div className="flex gap-2 w-full justify-end items-center">
+                    <div className="flex gap-2 w-full justify-end items-center mt-2">
                         <button
                             onClick={handleSend}
                             disabled={!hasContent}
                             className={`
-                                inline-flex items-center justify-center relative shrink-0 transition-colors h-8 w-8 rounded-md active:scale-95 !rounded-xl !h-8 !w-8
+                                group/btn inline-flex items-center justify-center relative shrink-0 transition-all duration-200 rounded-md !h-8 !w-8 ease-[cubic-bezier(0.34,1.56,0.64,1)]
                                 ${hasContent
-                                    ? 'bg-accent text-bg-0 hover:bg-accent-hover shadow-md'
-                                    : 'bg-bg-300 text-text-400 dark:bg-[#454540] dark:text-[#8A8A88]'}
+                                    ? 'bg-[#FF6B2C]/20 border border-[#FF6B2C]/30 text-[#FF6B2C] hover:bg-[#FF6B2C] hover:text-black hover:scale-105 hover:shadow-[0_0_20px_rgba(255,107,44,0.5)] active:scale-95'
+                                    : 'bg-white/5 text-white/20'}
                             `}
                             type="button"
                             aria-label="Send message"
                         >
-                            <Icons.ArrowUp className="w-4 h-4" />
+                            <Icons.ArrowUp className="w-4 h-4 transition-transform duration-150 group-hover/btn:-translate-y-0.5" />
                         </button>
                     </div>
                 </div>

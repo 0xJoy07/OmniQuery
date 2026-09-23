@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ClaudeChatInput from './ui/claude-style-chat-input';
 import { ThinkingTool } from './ui/thinking-tool';
+import { motion } from 'framer-motion';
 // ── Types ────────────────────────────────────────────────────
 interface ChatMessage {
     id: string;
@@ -130,21 +131,45 @@ const ChatInterface = () => {
     const hasMessages = messages.length > 0;
 
     return (
-        <div className="w-full min-h-screen bg-bg-0 flex flex-col items-center p-4 font-sans text-text-100 transition-colors duration-200">
+        <div className="relative w-full min-h-screen flex flex-col items-center p-4 font-mono text-white transition-colors duration-200 bg-[radial-gradient(ellipse_at_top,_#0f0a08_0%,_#000000_100%)]">
+            {/* Subtle orange glow at center top */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#FF6B2C]/[0.03] rounded-full blur-[100px] pointer-events-none" />
 
             {/* ── Empty state: Greeting + Input centered ── */}
             {!hasMessages && (
-                <div className="flex-1 flex flex-col items-center justify-center w-full max-w-3xl">
-                    <div className="w-full mb-8 sm:mb-12 text-center animate-fade-in">
-                        <div className="w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                <div className="flex-1 flex flex-col items-center justify-center w-full max-w-3xl relative z-10">
+                    <div className="w-full mb-8 sm:mb-12 text-center">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                            className="w-24 h-24 mx-auto mb-6 flex items-center justify-center"
+                        >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src="https://cdn.21st.dev/assets/mirror/68/6896117aefeca6a69a2ed98a88c9753acdb1e47b0d54b7b4fa63c7ab59e10f5b.png" alt="Logo" className="w-full h-full object-contain" />
-                        </div>
-                        <h1 className="text-3xl sm:text-4xl font-serif font-light text-text-200 mb-3 tracking-tight">
+                            <img 
+                                src="https://cdn.21st.dev/assets/mirror/68/6896117aefeca6a69a2ed98a88c9753acdb1e47b0d54b7b4fa63c7ab59e10f5b.png" 
+                                alt="Logo" 
+                                className="w-full h-full object-contain animate-[spin_8s_linear_infinite] hover:animate-[spin_2s_linear_infinite] drop-shadow-[0_0_10px_rgba(255,107,44,0.3)] hover:drop-shadow-[0_0_25px_rgba(255,107,44,0.7)] transition-all duration-300 cursor-pointer" 
+                            />
+                        </motion.div>
+                        <motion.h1 
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                            className="text-3xl sm:text-4xl font-mono font-bold text-white mb-3 tracking-tight"
+                        >
                             {greeting}
-                        </h1>
+                        </motion.h1>
                     </div>
-                    <ClaudeChatInput onSendMessage={handleSendMessage} />
+                    
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.97, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                        className="w-full"
+                    >
+                        <ClaudeChatInput onSendMessage={handleSendMessage} />
+                    </motion.div>
                 </div>
             )}
 
@@ -156,12 +181,12 @@ const ChatInterface = () => {
                         {messages.map(msg => (
                             <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`
-                                    max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed
+                                    max-w-[85%] rounded-md px-4 py-3 text-sm leading-relaxed
                                     ${msg.role === 'user'
-                                        ? 'bg-accent text-white rounded-br-md'
+                                        ? 'bg-[#FF6B2C] text-black font-semibold'
                                         : msg.role === 'error'
-                                            ? 'bg-red-500/10 border border-red-500/30 text-red-400 rounded-bl-md'
-                                            : 'bg-bg-200 text-text-100 rounded-bl-md'
+                                            ? 'bg-red-500/10 border border-red-500/30 text-red-400'
+                                            : 'bg-transparent border border-[#FF6B2C]/30 text-white'
                                     }
                                 `}>
                                     {/* Source badge for user messages */}
@@ -180,7 +205,7 @@ const ChatInterface = () => {
                         {/* Loading indicator */}
                         {isLoading && (
                             <div className="flex justify-start">
-                                <div className="bg-bg-200 rounded-2xl rounded-bl-md px-4 py-3 flex items-center min-w-[120px]">
+                                <div className="bg-transparent border border-[#FF6B2C]/30 rounded-md px-4 py-3 flex items-center min-w-[120px]">
                                     <ThinkingTool state="thinking" />
                                 </div>
                             </div>

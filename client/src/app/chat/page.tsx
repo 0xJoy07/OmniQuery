@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import BoxLoader from "@/components/ui/box-loader";
+import ChatInterface from "@/components/chat-interface";
 
 export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -24,10 +25,5 @@ export default function ChatPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center font-mono">
-      {/* Placeholder for the upcoming Chat UI */}
-      <h1 className="text-3xl text-[#FF6B2C]">Chat UI Ready to Build</h1>
-    </div>
-  );
+  return <ChatInterface />;
 }
