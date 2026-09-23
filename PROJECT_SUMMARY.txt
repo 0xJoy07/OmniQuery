@@ -1,0 +1,299 @@
+================================================================================
+                          OMNIQUERY — PROJECT SUMMARY
+================================================================================
+
+Project Name    : OmniQuery
+Type            : AI-Powered Multi-Source Question Answering Platform
+Category        : Full-Stack RAG (Retrieval-Augmented Generation) Application
+Training Under  : Euphoria GenX — Industrial Training Project
+Contributors    : Joy Sengupta, Anushikha Kundu, Srijan Mandal
+
+================================================================================
+  1. OVERVIEW
+================================================================================
+
+OmniQuery lets users ask questions about any website, YouTube video, or
+uploaded document and receive instant, context-grounded answers. It uses a
+Retrieval-Augmented Generation (RAG) approach to ensure that every answer is
+backed by real source material and is not hallucinated.
+
+Core idea:
+  User provides a source (URL / YouTube link / File)
+  + asks a question
+  → System ingests, chunks, embeds, retrieves, and generates an answer.
+
+================================================================================
+  2. ARCHITECTURE
+================================================================================
+
+OmniQuery follows a decoupled client–server architecture:
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │                    CLIENT (Next.js 16)                      │
+  │                                                             │
+  │   page.tsx ──► ChatInterface ──► ClaudeChatInput            │
+  │                     │                                       │
+  │              POST /api/query                                │
+  │                     │                                       │
+  │          route.ts (API Proxy)                               │
+  └─────────────┬───────────────────────────────────────────────┘
+                │  HTTP (JSON / FormData)
+                ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │                  SERVER (Flask + Python)                     │
+  │                                                             │
+  │   app.py ──► /api/query/web      ──► web_pipeline()         │
+  │          ──► /api/query/youtube  ──► youtube_pipeline()      │
+  │          ──► /api/query/document ──► doc_pipeline()          │
+  │                     │                                       │
+  │          ┌──────────┴──────────┐                            │
+  │          ▼                     ▼                            │
+  │   ┌─────────────┐     ┌──────────────┐                     │
+  │   │  ChromaDB   │     │   Groq LLM   │                     │
+  │   │  (Vectors)  │     │  (Inference)  │                     │
+  │   └─────────────┘     └──────────────┘                     │
+  └─────────────────────────────────────────────────────────────┘
+
+Data Flow (applies to all three pipelines):
+  Ingest → Chunk → Embed → Store in ChromaDB → Similarity Search → LLM → Answer
+
+================================================================================
+  3. TECH STACK
+================================================================================
+
+FRONTEND
+--------
+  Framework       : Next.js 16 (App Router)
+  UI Library      : React 19
+  Language        : TypeScript
+  Styling         : Tailwind CSS 4
+  Animations      : Motion (Framer Motion) v13
+  Components      : shadcn/ui, Lucide React icons, Tabler Icons
+  API Proxy       : Next.js API Route (/api/query/route.ts)
+
+BACKEND
+-------
+  Framework       : Flask 3.x (Python)
+  CORS            : flask-cors
+  RAG Framework   : LangChain (langchain-community, langchain-core,
+                    langchain-text-splitters, langchain-chroma,
+                    langchain-google-genai, langchain-groq)
+  Vector Database : ChromaDB (local persistent storage)
+  Embedding Model : Google Gemini (gemini-embedding-001)
+  LLM Inference   : Groq API (model: openai/gpt-oss-20b)
+  PDF Parsing     : pypdf
+  YouTube         : youtube-transcript-api
+  Env Management  : python-dotenv
+
+================================================================================
+  4. RAG PIPELINES — DETAILED BREAKDOWN
+================================================================================
+
+Each pipeline follows the same 6-step pattern but with a source-specific loader.
+
+4.1  WEB PIPELINE (feature/web/)
+---------------------------------
+  Step 1 — Load     : webLoader.py scrapes the given public URL
+  Step 2 — Chunk    : chuncking.py splits text using LangChain text splitter
+  Step 3 — Embed    : embed.py generates embeddings via Gemini (gemini-embedding-001)
+  Step 4 — Store    : chromaDB.py persists vectors to db/web_chroma
+  Step 5 — Retrieve : Similarity search (k=3) on the stored vectors
+  Step 6 — Generate : response_generator.py sends context + question to Groq LLM
+
+  Orchestrator     : web_main.py → web_pipeline(url, question) → answer string
+
+4.2  YOUTUBE PIPELINE (feature/vid/)
+--------------------------------------
+  Step 1 — Load     : yt_loader.py extracts transcript via youtube-transcript-api
+                      Also extracts video_id from the URL for per-video collections
+  Step 2 — Chunk    : chunking.py splits transcript into smaller segments
+  Step 3 — Embed    : embed.py generates embeddings via Gemini
+  Step 4 — Store    : chromaDB.py saves to a per-video ChromaDB collection
+                      (collection name: youtube_{video_id})
+  Step 5 — Retrieve : Similarity search (k=3) on the video-specific collection
+  Step 6 — Generate : response_generator.py sends context + question to Groq LLM
+
+  Orchestrator     : yt_main.py → youtube_pipeline(url, question) → answer string
+
+4.3  DOCUMENT PIPELINE (feature/doc/)
+---------------------------------------
+  Step 1 — Load     : doc_loader.py supports 14 file formats using LangChain loaders:
+                        PDF         → PyPDFLoader
+                        DOC/DOCX    → UnstructuredWordDocumentLoader
+                        PPT/PPTX    → UnstructuredPowerPointLoader
+                        XLS/XLSX    → UnstructuredExcelLoader
+                        CSV         → CSVLoader
+                        TXT/LOG     → TextLoader
+                        JSON        → JSONLoader
+                        MD          → UnstructuredMarkdownLoader
+                        HTML/HTM    → UnstructuredHTMLLoader
+  Step 2 — Chunk    : chunking.py splits loaded document pages
+  Step 3 — Embed    : embed.py generates embeddings via Gemini
+  Step 4 — Store    : chromaDB.py persists to db/doc_chroma
+  Step 5 — Retrieve : Similarity search (k=3)
+  Step 6 — Generate : response_generator.py sends context + question to Groq LLM
+
+  Orchestrator     : doc_main.py → doc_pipeline(file_path, question) → answer string
+
+================================================================================
+  5. API ENDPOINTS
+================================================================================
+
+Base URL: http://localhost:8000
+
+  METHOD   ENDPOINT               CONTENT TYPE         DESCRIPTION
+  ------   --------               ------------         -----------
+  GET      /api/health            —                    Health check (returns {"status":"ok"})
+  POST     /api/query/web         application/json     Query a website URL
+  POST     /api/query/youtube     application/json     Query a YouTube video
+  POST     /api/query/document    multipart/form-data  Query an uploaded document
+
+Request Bodies:
+  /api/query/web & /api/query/youtube:
+    {
+      "url": "<URL string>",
+      "question": "<question string>"
+    }
+
+  /api/query/document:
+    Form fields:
+      file     — the uploaded document (max 50 MB)
+      question — the question about the document
+
+Response Format (all endpoints):
+    {
+      "answer": "<generated answer with follow-up questions>",
+      "source": "web" | "youtube" | "document"
+    }
+
+================================================================================
+  6. LLM PROMPT STRATEGY
+================================================================================
+
+The response generator uses a grounded-answer prompt template:
+
+  - Answer ONLY from the provided context
+  - If information is not available in context, say so explicitly
+  - After answering, generate 2–3 follow-up questions that:
+      • Are answerable from the given context
+      • Do not introduce topics outside the context
+      • Are concise and curiosity-driven
+
+This ensures hallucination-resistant, context-faithful answers.
+
+================================================================================
+  7. PROJECT STRUCTURE
+================================================================================
+
+OmniQuery/
+├── architechture/                     # Architecture diagrams (Mermaid)
+│   ├── doc.architecture.md
+│   ├── web.architecture.md
+│   └── yt.architecture.md
+│
+├── client/                            # Next.js 16 frontend
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── api/query/route.ts     # API proxy → Flask backend
+│   │   │   ├── globals.css            # Global styles & theme variables
+│   │   │   ├── layout.tsx             # Root layout (Geist font, dark mode)
+│   │   │   └── page.tsx               # Main page (Hero + Chat)
+│   │   ├── components/
+│   │   │   ├── chat-interface.tsx      # Chat logic & message rendering
+│   │   │   └── ui/
+│   │   │       ├── arc-preloader-hero.tsx       # Animated intro sequence
+│   │   │       ├── claude-style-chat-input.tsx  # Rich input with file upload
+│   │   │       ├── thinking-tool.tsx            # Loading/thinking indicator
+│   │   │       └── button.tsx                   # Button component
+│   │   └── lib/
+│   │       └── utils.ts               # Utility functions
+│   ├── package.json
+│   ├── next.config.ts
+│   └── tsconfig.json
+│
+├── server/                            # Python backend
+│   └── python/
+│       ├── app.py                     # Flask application & endpoints
+│       ├── main.py                    # CLI entry point (for testing)
+│       ├── requirements.txt           # Python dependencies
+│       ├── .env                       # API keys (not committed)
+│       └── feature/                   # RAG pipeline modules
+│           ├── __init__.py            # Public API exports
+│           ├── web/                   # Web scraping pipeline
+│           │   ├── webLoader.py       # URL content scraper
+│           │   ├── chuncking.py       # Text splitter
+│           │   ├── embed.py           # Gemini embedding model
+│           │   ├── chromaDB.py        # Vector store (db/web_chroma)
+│           │   ├── response_generator.py  # Groq LLM response
+│           │   └── web_main.py        # Pipeline orchestrator
+│           ├── vid/                   # YouTube pipeline
+│           │   ├── yt_loader.py       # Transcript extractor
+│           │   ├── chunking.py        # Text splitter
+│           │   ├── embed.py           # Gemini embedding model
+│           │   ├── chromaDB.py        # Vector store (per-video collections)
+│           │   ├── response_generator.py  # Groq LLM response
+│           │   └── yt_main.py         # Pipeline orchestrator
+│           └── doc/                   # Document pipeline
+│               ├── doc_loader.py      # Multi-format document loader (14 formats)
+│               ├── chunking.py        # Text splitter
+│               ├── embed.py           # Gemini embedding model
+│               ├── chromaDB.py        # Vector store (db/doc_chroma)
+│               ├── response_generator.py  # Groq LLM response
+│               └── doc_main.py        # Pipeline orchestrator
+│
+├── .gitignore
+├── README.md
+└── PROJECT_SUMMARY.txt                # ← This file
+
+================================================================================
+  8. ENVIRONMENT VARIABLES
+================================================================================
+
+  Variable          Location                Required   Description
+  --------          --------                --------   -----------
+  GOOGLE_API_KEY    server/python/.env      Yes        Google AI key for Gemini embeddings
+  GROQ_API_KEY      server/python/.env      Yes        Groq key for LLM inference
+  CORS_ORIGINS      server/python/.env      No         Comma-separated allowed origins
+  FASTAPI_BASE_URL  client/.env.local       No         Backend URL (default: http://localhost:8000)
+
+================================================================================
+  9. HOW TO RUN
+================================================================================
+
+Prerequisites:
+  - Node.js >= 18
+  - Python >= 3.10
+  - Google AI API key (Gemini embeddings)
+  - Groq API key (LLM inference)
+
+Backend:
+  cd server/python
+  python -m venv .venv
+  .venv\Scripts\activate          (Windows)
+  pip install -r requirements.txt
+  # Create .env with GOOGLE_API_KEY and GROQ_API_KEY
+  python app.py                   → runs on http://localhost:8000
+
+Frontend:
+  cd client
+  npm install
+  npm run dev                     → runs on http://localhost:3000
+
+================================================================================
+  10. KEY FEATURES
+================================================================================
+
+  • RAG Pipeline         — Retrieval-Augmented Generation with ChromaDB + Gemini
+  • Groq-Powered LLM     — Ultra-fast inference via openai/gpt-oss-20b
+  • 14-Format Doc Support — PDF, DOCX, PPTX, XLSX, CSV, TXT, JSON, MD, HTML, etc.
+  • YouTube Transcript    — Automatic extraction with per-video vector collections
+  • Website Q&A           — Scrape any public URL and ask questions
+  • Modern Chat UI        — Polished, animated interface with source badges
+  • Cinematic Intro       — Arc-reveal preloader cycling through source types
+  • Unified API Proxy     — Next.js route proxies to backend, no CORS issues
+  • Follow-Up Questions   — Every answer includes 2–3 context-grounded suggestions
+  • File Upload           — Drag-and-drop or browse, with 50 MB size limit
+
+================================================================================
+                              END OF SUMMARY
+================================================================================

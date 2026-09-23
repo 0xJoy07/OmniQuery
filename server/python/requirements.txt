@@ -7,6 +7,5 @@ pypdf
 python-dotenv
 youtube-transcript-api
 langchain-core
-fastapi
-uvicorn[standard]
-python-multipart
+flask
+flask-cors

@@ -31,11 +31,11 @@
 
 **OmniQuery** is a full-stack Retrieval-Augmented Generation (RAG) application that lets users query information from three distinct source types through a single, elegant chat interface:
 
-| Source                | What it does                                                                               |
-| --------------------- | ------------------------------------------------------------------------------------------ |
-| 🌐 **Web Pages**      | Scrapes and indexes any public URL, then answers questions grounded in the page content    |
+| Source | What it does |
+|--------|-------------|
+| 🌐 **Web Pages** | Scrapes and indexes any public URL, then answers questions grounded in the page content |
 | 🎬 **YouTube Videos** | Extracts video transcripts, chunks and embeds them, then answers questions about the video |
-| 📄 **Documents**      | Accepts PDF, DOCX, PPTX, XLSX, CSV, TXT, JSON, Markdown, and HTML uploads for Q&A          |
+| 📄 **Documents** | Accepts PDF, DOCX, PPTX, XLSX, CSV, TXT, JSON, Markdown, and HTML uploads for Q&A |
 
 Each pipeline follows the same pattern: **Ingest → Chunk → Embed → Store → Retrieve → Generate** — ensuring accurate, hallucination-resistant answers backed by source material.
 
@@ -105,27 +105,25 @@ flowchart LR
 ## Tech Stack
 
 ### Frontend
-
-| Technology                                    | Purpose                                      |
-| --------------------------------------------- | -------------------------------------------- |
-| [Next.js 16](https://nextjs.org/)             | React framework with App Router & API routes |
-| [React 19](https://react.dev/)                | UI library                                   |
-| [TypeScript](https://www.typescriptlang.org/) | Type safety                                  |
-| [Tailwind CSS 4](https://tailwindcss.com/)    | Utility-first styling                        |
-| [Motion (Framer Motion)](https://motion.dev/) | Animations & transitions                     |
-| [shadcn/ui](https://ui.shadcn.com/)           | Component primitives                         |
-| [Lucide React](https://lucide.dev/)           | Icon system                                  |
+| Technology | Purpose |
+|-----------|---------|
+| [Next.js 16](https://nextjs.org/) | React framework with App Router & API routes |
+| [React 19](https://react.dev/) | UI library |
+| [TypeScript](https://www.typescriptlang.org/) | Type safety |
+| [Tailwind CSS 4](https://tailwindcss.com/) | Utility-first styling |
+| [Motion (Framer Motion)](https://motion.dev/) | Animations & transitions |
+| [shadcn/ui](https://ui.shadcn.com/) | Component primitives |
+| [Lucide React](https://lucide.dev/) | Icon system |
 
 ### Backend
-
-| Technology                                         | Purpose                                         |
-| -------------------------------------------------- | ----------------------------------------------- |
-| [FastAPI](https://fastapi.tiangolo.com/)           | Async Python web framework                      |
-| [LangChain](https://www.langchain.com/)            | RAG orchestration (loaders, splitters, chains)  |
-| [ChromaDB](https://www.trychroma.com/)             | Vector database for embeddings                  |
-| [Google Gemini Embeddings](https://ai.google.dev/) | `gemini-embedding-001` for text embedding       |
-| [Groq](https://groq.com/)                          | Ultra-fast LLM inference (`openai/gpt-oss-20b`) |
-| [Uvicorn](https://www.uvicorn.org/)                | ASGI server                                     |
+| Technology | Purpose |
+|-----------|---------|
+| [FastAPI](https://fastapi.tiangolo.com/) | Async Python web framework |
+| [LangChain](https://www.langchain.com/) | RAG orchestration (loaders, splitters, chains) |
+| [ChromaDB](https://www.trychroma.com/) | Vector database for embeddings |
+| [Google Gemini Embeddings](https://ai.google.dev/) | `gemini-embedding-001` for text embedding |
+| [Groq](https://groq.com/) | Ultra-fast LLM inference (`openai/gpt-oss-20b`) |
+| [Uvicorn](https://www.uvicorn.org/) | ASGI server |
 
 ---
 
@@ -215,7 +213,6 @@ GET /api/health
 ```
 
 **Response:**
-
 ```json
 { "status": "ok" }
 ```
@@ -230,7 +227,6 @@ Content-Type: application/json
 ```
 
 **Request Body:**
-
 ```json
 {
   "url": "https://example.com",
@@ -239,7 +235,6 @@ Content-Type: application/json
 ```
 
 **Response:**
-
 ```json
 {
   "answer": "This page is about...",
@@ -257,7 +252,6 @@ Content-Type: application/json
 ```
 
 **Request Body:**
-
 ```json
 {
   "url": "https://www.youtube.com/watch?v=VIDEO_ID",
@@ -266,7 +260,6 @@ Content-Type: application/json
 ```
 
 **Response:**
-
 ```json
 {
   "answer": "The speaker discusses...",
@@ -292,7 +285,6 @@ Content-Type: multipart/form-data
 **Supported formats:** `.pdf`, `.doc`, `.docx`, `.ppt`, `.pptx`, `.xls`, `.xlsx`, `.csv`, `.txt`, `.log`, `.json`, `.md`, `.html`, `.htm`
 
 **Response:**
-
 ```json
 {
   "answer": "According to the document...",
@@ -369,12 +361,12 @@ OmniQuery/
 
 ## Environment Variables
 
-| Variable           | Where                | Required | Description                                                        |
-| ------------------ | -------------------- | -------- | ------------------------------------------------------------------ |
-| `GOOGLE_API_KEY`   | `server/python/.env` | ✅       | Google AI API key for Gemini embeddings                            |
-| `GROQ_API_KEY`     | `server/python/.env` | ✅       | Groq API key for LLM inference                                     |
-| `CORS_ORIGINS`     | `server/python/.env` | ❌       | Comma-separated allowed origins (default: `http://localhost:3000`) |
-| `FASTAPI_BASE_URL` | `client/.env.local`  | ❌       | Backend URL (default: `http://localhost:8000`)                     |
+| Variable | Where | Required | Description |
+|----------|-------|----------|-------------|
+| `GOOGLE_API_KEY` | `server/python/.env` | ✅ | Google AI API key for Gemini embeddings |
+| `GROQ_API_KEY` | `server/python/.env` | ✅ | Groq API key for LLM inference |
+| `CORS_ORIGINS` | `server/python/.env` | ❌ | Comma-separated allowed origins (default: `http://localhost:3000`) |
+| `FASTAPI_BASE_URL` | `client/.env.local` | ❌ | Backend URL (default: `http://localhost:8000`) |
 
 ---
 
