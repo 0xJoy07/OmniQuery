@@ -2,8 +2,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ClaudeChatInput from './ui/claude-style-chat-input';
 import { ThinkingTool } from './ui/thinking-tool';
-import { Loader2 } from 'lucide-react';
-
 // ── Types ────────────────────────────────────────────────────
 interface ChatMessage {
     id: string;

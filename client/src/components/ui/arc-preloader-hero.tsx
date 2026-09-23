@@ -47,17 +47,36 @@ export interface ArcRevealHeroProps {
 /* ── defaults ────────────────────────────────────────────────── */
 
 const DEFAULT_GREETINGS: ArcRevealGreeting[] = [
-  { text: "PDF" },
-  { text: "YouTube Video" },
-  { text: "Web Page" },
-  { text: "MS Documents" },
-  { text: "Markdown" },
-  { text: "JSON" },
-  { text: "Getting Answers is now in hands" },
-  { text: "With Omni Query" },
+  { text: "PDFs" },
+  { text: "YOUTUBE VIDEOS" },
+  { text: "WEB PAGES & CSV FILES" },
+  { text: "MS DOCUMENTS" },
+  { text: "MARKDOWN, JSON" },
+  { text: "INSTANT ANSWERS" },
+  { text: "WITH OMNI QUERY" },
 ];
 
 type Phase = "intro" | "reveal" | "done";
+
+const BG_COLORS = [
+  "bg-black",
+  "bg-[#FF6B2C]",
+  "bg-white",
+  "bg-black",
+  "bg-[#FF6B2C]",
+  "bg-black",
+  "bg-[#FF6B2C]",
+];
+
+const TEXT_COLORS = [
+  "text-[#FF6B2C]",
+  "text-black",
+  "text-black",
+  "text-white",
+  "text-white",
+  "text-[#FF6B2C]",
+  "text-white",
+];
 
 /* ── component ───────────────────────────────────────────────── */
 
@@ -83,10 +102,11 @@ export function ArcRevealHero({
   //   t=0 → chord at y=110 (off-screen below)  → no curtain visible
   //   t=1 → chord at y=-30 (off-screen above)  → full-screen curtain
   const progress = useMotionValue(0);
-  const arcPath = useTransform(progress, (p: number) => {
-    const edge = 110 - p * 140;
-    const control = edge + 25;
-    return `M 0 ${edge} Q 50 ${control} 100 ${edge} L 100 110 L 0 110 Z`;
+  // Use a normalized clipPath [0, 1] for objectBoundingBox
+  const arcClipPath = useTransform(progress, (p: number) => {
+    const edge = 1.1 - p * 1.4;
+    const control = edge + 0.25;
+    return `M 0 0 L 1 0 L 1 ${edge} Q 0.5 ${control} 0 ${edge} Z`;
   });
 
   // Honor reduced-motion + replay-suppression on mount.
@@ -111,7 +131,8 @@ export function ArcRevealHero({
     if (phase !== "intro") return;
     const isLast = index >= greetings.length - 1;
     if (isLast) {
-      const t = window.setTimeout(() => setPhase("reveal"), greetingHold + 220);
+      // Give the custom final animation enough time to play out completely
+      const t = window.setTimeout(() => setPhase("reveal"), 2000);
       return () => window.clearTimeout(t);
     }
     const t = window.setTimeout(() => setIndex((i) => i + 1), greetingHold);
@@ -153,48 +174,112 @@ export function ArcRevealHero({
 
       <AnimatePresence>
         {showOverlay && (
-          <motion.div
-            key="arc-reveal-overlay"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-            className={cn(
-              "absolute inset-x-0 top-0 z-30 h-screen overflow-hidden bg-foreground",
-              introClassName,
-            )}
-          >
-            {/* Cycled greeting */}
-            <div className="absolute inset-0 flex items-center justify-center">
+          <>
+            <svg width="0" height="0" className="absolute pointer-events-none">
+              <clipPath id="arc-clip" clipPathUnits="objectBoundingBox">
+                <motion.path d={arcClipPath} />
+              </clipPath>
+            </svg>
+
+            <motion.div
+              key="arc-reveal-overlay"
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+              style={{ clipPath: "url(#arc-clip)", WebkitClipPath: "url(#arc-clip)" }}
+              className={cn(
+                "absolute inset-x-0 top-0 z-30 h-screen overflow-hidden transition-colors duration-500 pointer-events-none",
+                BG_COLORS[index % BG_COLORS.length],
+                introClassName,
+              )}
+            >
+              {/* Cycled greeting */}
+              <div className="absolute inset-0 flex items-center justify-center">
               <AnimatePresence mode="wait">
                 {phase === "intro" && current && (
-                  <motion.span
-                    key={`${index}-${current.text}`}
-                    lang={current.lang}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                    className={cn(
-                      "select-none px-6 text-center text-5xl font-semibold tracking-tight text-background sm:text-6xl md:text-7xl",
-                      greetingClassName,
-                    )}
-                  >
-                    {current.text}
-                  </motion.span>
+                  current.text === "INSTANT ANSWERS" ? (
+                    <motion.div
+                      key={`${index}-${current.text}`}
+                      className={cn(
+                        "select-none px-6 text-center text-6xl font-bold tracking-tight text-[#FF6B2C] font-mono sm:text-7xl md:text-8xl flex flex-col md:flex-row items-center gap-4 md:gap-6 overflow-hidden",
+                        greetingClassName,
+                      )}
+                    >
+                      <motion.span
+                        initial={{ opacity: 0, x: -150 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -150 }}
+                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                      >
+                        INSTANT
+                      </motion.span>
+                      <motion.span
+                        initial={{ opacity: 0, x: 150 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 150 }}
+                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                      >
+                        ANSWERS
+                      </motion.span>
+                    </motion.div>
+                  ) : current.text === "WITH OMNI QUERY" ? (
+                    <motion.div
+                      key={`${index}-${current.text}`}
+                      className={cn(
+                        "select-none px-6 text-center text-6xl font-bold tracking-tight text-[#FF6B2C] font-mono sm:text-7xl md:text-8xl relative w-full h-full flex items-center justify-center",
+                        greetingClassName,
+                      )}
+                    >
+                      {/* Dynamic Background Transition: Orange to White */}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.6, duration: 0.5, ease: "easeOut" }}
+                        className="absolute inset-0 bg-white z-0 pointer-events-none"
+                      />
+
+                      <motion.span
+                        initial={{ scale: 1, opacity: 1 }}
+                        animate={{ scale: 300, opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 1.5, ease: [0.7, 0, 0.2, 1] }}
+                        className="absolute flex items-center justify-center z-10 origin-center pointer-events-none text-white"
+                      >
+                        WITH
+                      </motion.span>
+                      <motion.span
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.6, duration: 0.5, ease: "easeOut" }}
+                        className="relative z-20 font-bold text-[#FF6B2C] text-7xl sm:text-8xl md:text-9xl"
+                      >
+                        OMNI QUERY
+                      </motion.span>
+                    </motion.div>
+                  ) : (
+                    <motion.span
+                      key={`${index}-${current.text}`}
+                      lang={current.lang}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -15 }}
+                      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                      className={cn(
+                        "select-none px-6 text-center text-6xl font-bold tracking-tight font-mono sm:text-7xl md:text-8xl uppercase",
+                        TEXT_COLORS[index % TEXT_COLORS.length],
+                        greetingClassName,
+                      )}
+                    >
+                      {current.text}
+                    </motion.span>
+                  )
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Rising curved curtain */}
-            <svg
-              className="pointer-events-none absolute inset-0 h-full w-full"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-              aria-hidden
-            >
-              <motion.path d={arcPath} style={{ fill: "var(--background)" }} />
-            </svg>
           </motion.div>
+          </>
         )}
       </AnimatePresence>
     </section>
