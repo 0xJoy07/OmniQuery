@@ -33,6 +33,14 @@ export function MynaHero() {
   const controls = useAnimation();
   const ref = React.useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.1 });
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+
+  React.useEffect(() => {
+    // Check auth via API (httpOnly cookies can't be read by JS)
+    fetch('/api/auth/me', { credentials: 'include' })
+        .then(res => { if (res.ok) setIsLoggedIn(true); })
+        .catch(() => {});
+  }, []);
 
   React.useEffect(() => {
     if (isInView) {
@@ -77,9 +85,9 @@ export function MynaHero() {
           </nav>
 
           <div className="flex items-center space-x-4">
-            <Link href="/chat">
+            <Link href={isLoggedIn ? '/dashboard/profile' : '/login'}>
               <InteractiveHoverButton
-                text="GET STARTED"
+                text={isLoggedIn ? 'PROFILE' : 'LOGIN'}
                 className="hidden md:flex w-44 font-mono text-sm border-[#FF6B2C] text-[#FF6B2C] items-center justify-center bg-transparent"
               />
             </Link>

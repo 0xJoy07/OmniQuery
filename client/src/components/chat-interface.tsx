@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { AIChatInput } from './ui/ai-chat-input';
 import { ThinkingTool } from './ui/thinking-tool';
 import { motion } from 'framer-motion';
-import { Plus, MessageSquare, Settings, User } from 'lucide-react';
+import { Plus, MessageSquare, Settings, User, LogIn } from 'lucide-react';
 
 // ── Types ────────────────────────────────────────────────────
 interface ChatMessage {
@@ -23,14 +24,23 @@ async function queryAPI(payload: {
     url?: string;
     file?: File;
 }): Promise<{ answer: string; source: string }> {
+    const sourceMap: Record<string, string> = {
+        web: 'web',
+        website: 'web',
+        youtube: 'youtube',
+        document: 'document',
+    };
+    const endpoint = sourceMap[payload.source] || payload.source;
+
     if (payload.source === 'document' && payload.file) {
         const formData = new FormData();
         formData.append('file', payload.file, payload.file.name);
         formData.append('question', payload.question);
 
-        const res = await fetch('/api/query', {
+        const res = await fetch(`/api/query/${endpoint}`, {
             method: 'POST',
             body: formData,
+            credentials: 'include',
         });
 
         const data = await res.json();
@@ -38,13 +48,13 @@ async function queryAPI(payload: {
         return data;
     }
 
-    const res = await fetch('/api/query', {
+    const res = await fetch(`/api/query/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
-            source: payload.source,
-            question: payload.question,
             url: payload.url,
+            question: payload.question,
         }),
     });
 
@@ -53,11 +63,20 @@ async function queryAPI(payload: {
     return data;
 }
 
+
 // ── Component ────────────────────────────────────────────────
 const ChatInterface = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Check auth state via API (httpOnly cookies can't be read by JS)
+    useEffect(() => {
+        fetch('/api/auth/me', { credentials: 'include' })
+            .then(res => { if (res.ok) setIsLoggedIn(true); })
+            .catch(() => {});
+    }, []);
 
     // Auto-scroll to latest message
     useEffect(() => {
@@ -155,18 +174,30 @@ const ChatInterface = () => {
                     </button>
                 </div>
 
-                {/* Profile Section */}
+                {/* Profile / Login Section */}
                 <div className="p-3 border-t border-zinc-800">
-                    <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-zinc-800 rounded-lg transition-colors text-sm">
-                        <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center">
-                            <User size={16} />
-                        </div>
-                        <div className="flex flex-col items-start flex-1 text-left">
-                            <span className="font-medium text-zinc-200">User Profile</span>
-                            <span className="text-xs text-zinc-500">Free Plan</span>
-                        </div>
-                        <Settings size={16} className="text-zinc-500" />
-                    </button>
+                    {isLoggedIn ? (
+                        <Link href="/dashboard/profile" className="w-full flex items-center gap-3 px-3 py-2 hover:bg-zinc-800 rounded-lg transition-colors text-sm">
+                            <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center">
+                                <User size={16} />
+                            </div>
+                            <div className="flex flex-col items-start flex-1 text-left">
+                                <span className="font-medium text-zinc-200">Dashboard</span>
+                                <span className="text-xs text-zinc-500">Settings & Profile</span>
+                            </div>
+                            <Settings size={16} className="text-zinc-500" />
+                        </Link>
+                    ) : (
+                        <Link href="/login" className="w-full flex items-center gap-3 px-3 py-2 hover:bg-zinc-800 rounded-lg transition-colors text-sm">
+                            <div className="w-8 h-8 rounded-full bg-[#FF6B2C]/20 flex items-center justify-center">
+                                <LogIn size={16} className="text-[#FF6B2C]" />
+                            </div>
+                            <div className="flex flex-col items-start flex-1 text-left">
+                                <span className="font-medium text-zinc-200">Login</span>
+                                <span className="text-xs text-zinc-500">Sign in to your account</span>
+                            </div>
+                        </Link>
+                    )}
                 </div>
             </aside>
 
