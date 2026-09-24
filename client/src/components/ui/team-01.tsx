@@ -116,6 +116,7 @@ const Team = () => {
                   }}
                   className="group flex flex-col items-center justify-center gap-6"
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     className="animate-blob w-full max-w-[280px] aspect-square object-cover group-hover:scale-105 group-hover:grayscale transition-all duration-700 ease-in-out shadow-[0_0_20px_rgba(255,107,44,0.1)] group-hover:shadow-[0_0_30px_rgba(255,107,44,0.3)]"
                     src={typeof value.image === "string" ? value.image : value.image.src}

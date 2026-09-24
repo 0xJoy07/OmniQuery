@@ -1,8 +1,10 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
-import ClaudeChatInput from './ui/claude-style-chat-input';
+import { AIChatInput } from './ui/ai-chat-input';
 import { ThinkingTool } from './ui/thinking-tool';
 import { motion } from 'framer-motion';
+import { Plus, MessageSquare, Settings, User } from 'lucide-react';
+
 // ── Types ────────────────────────────────────────────────────
 interface ChatMessage {
     id: string;
@@ -21,7 +23,6 @@ async function queryAPI(payload: {
     url?: string;
     file?: File;
 }): Promise<{ answer: string; source: string }> {
-    // Document upload uses FormData
     if (payload.source === 'document' && payload.file) {
         const formData = new FormData();
         formData.append('file', payload.file, payload.file.name);
@@ -37,7 +38,6 @@ async function queryAPI(payload: {
         return data;
     }
 
-    // URL-based queries use JSON
     const res = await fetch('/api/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -66,17 +66,14 @@ const ChatInterface = () => {
 
     const handleSendMessage = async (data: {
         message: string;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        files: any[];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        pastedContent: any[];
+        files: { file: File }[];
+        pastedContent: unknown[];
         source: string;
         url?: string;
     }) => {
         const question = data.message.trim();
         if (!question) return;
 
-        // Build user message
         const userMsg: ChatMessage = {
             id: crypto.randomUUID(),
             role: 'user',
@@ -120,6 +117,10 @@ const ChatInterface = () => {
         }
     };
 
+    const handleNewChat = () => {
+        setMessages([]);
+    };
+
     const currentHour = new Date().getHours();
     let greeting = 'Good morning';
     if (currentHour >= 12 && currentHour < 18) {
@@ -131,95 +132,127 @@ const ChatInterface = () => {
     const hasMessages = messages.length > 0;
 
     return (
-        <div className="relative w-full min-h-screen flex flex-col items-center p-4 font-mono text-white transition-colors duration-200 bg-[radial-gradient(ellipse_at_top,_#0f0a08_0%,_#000000_100%)]">
-            {/* Subtle orange glow at center top */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#FF6B2C]/[0.03] rounded-full blur-[100px] pointer-events-none" />
-
-            {/* ── Empty state: Greeting + Input centered ── */}
-            {!hasMessages && (
-                <div className="flex-1 flex flex-col items-center justify-center w-full max-w-3xl relative z-10">
-                    <div className="w-full mb-8 sm:mb-12 text-center">
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                            className="w-24 h-24 mx-auto mb-6 flex items-center justify-center"
-                        >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img 
-                                src="https://cdn.21st.dev/assets/mirror/68/6896117aefeca6a69a2ed98a88c9753acdb1e47b0d54b7b4fa63c7ab59e10f5b.png" 
-                                alt="Logo" 
-                                className="w-full h-full object-contain animate-[spin_8s_linear_infinite] hover:animate-[spin_2s_linear_infinite] drop-shadow-[0_0_10px_rgba(255,107,44,0.3)] hover:drop-shadow-[0_0_25px_rgba(255,107,44,0.7)] transition-all duration-300 cursor-pointer" 
-                            />
-                        </motion.div>
-                        <motion.h1 
-                            initial={{ opacity: 0, y: 16 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                            className="text-3xl sm:text-4xl font-mono font-bold text-white mb-3 tracking-tight"
-                        >
-                            {greeting}
-                        </motion.h1>
-                    </div>
-                    
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.97, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                        className="w-full"
+        <div className="flex h-screen w-full bg-[#0A0A0A] text-zinc-100 font-sans">
+            {/* Sidebar */}
+            <aside className="w-64 bg-[#121212] border-r border-zinc-800 flex flex-col flex-shrink-0 hidden md:flex">
+                {/* New Chat Button */}
+                <div className="p-3">
+                    <button
+                        onClick={handleNewChat}
+                        className="w-full flex items-center gap-3 px-3 py-2 bg-[#FF6B2C]/10 text-[#FF6B2C] hover:bg-[#FF6B2C]/20 border border-[#FF6B2C]/20 text-sm font-medium rounded-lg transition-colors"
                     >
-                        <ClaudeChatInput onSendMessage={handleSendMessage} />
-                    </motion.div>
+                        <Plus size={16} />
+                        New chat
+                    </button>
                 </div>
-            )}
 
-            {/* ── Chat state: Messages + Input at bottom ── */}
-            {hasMessages && (
-                <>
-                    {/* Messages area */}
-                    <div className="flex-1 w-full max-w-3xl overflow-y-auto pb-4 space-y-4 pt-6">
-                        {messages.map(msg => (
-                            <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`
-                                    max-w-[85%] rounded-md px-4 py-3 text-sm leading-relaxed
-                                    ${msg.role === 'user'
-                                        ? 'bg-[#FF6B2C] text-black font-semibold'
-                                        : msg.role === 'error'
-                                            ? 'bg-red-500/10 border border-red-500/30 text-red-400'
-                                            : 'bg-transparent border border-[#FF6B2C]/30 text-white'
-                                    }
-                                `}>
-                                    {/* Source badge for user messages */}
-                                    {msg.role === 'user' && (msg.url || msg.fileName) && (
-                                        <div className="text-xs opacity-70 mb-1.5 flex items-center gap-1.5">
-                                            <span className="uppercase font-medium tracking-wider">{msg.source}</span>
-                                            <span className="opacity-50">·</span>
-                                            <span className="truncate max-w-[200px]">{msg.url || msg.fileName}</span>
-                                        </div>
-                                    )}
-                                    <div className="whitespace-pre-wrap">{msg.content}</div>
-                                </div>
-                            </div>
-                        ))}
+                {/* Chat History List */}
+                <div className="flex-1 overflow-y-auto p-3">
+                    <div className="text-xs font-semibold text-zinc-500 mb-3 px-2">Today</div>
+                    <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-zinc-800 text-zinc-300 text-sm rounded-lg transition-colors truncate text-left">
+                        <MessageSquare size={16} className="shrink-0" />
+                        <span className="truncate">Current Conversation</span>
+                    </button>
+                </div>
 
-                        {/* Loading indicator */}
-                        {isLoading && (
-                            <div className="flex justify-start">
-                                <div className="bg-transparent border border-[#FF6B2C]/30 rounded-md px-4 py-3 flex items-center min-w-[120px]">
-                                    <ThinkingTool state="thinking" />
-                                </div>
-                            </div>
-                        )}
+                {/* Profile Section */}
+                <div className="p-3 border-t border-zinc-800">
+                    <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-zinc-800 rounded-lg transition-colors text-sm">
+                        <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center">
+                            <User size={16} />
+                        </div>
+                        <div className="flex flex-col items-start flex-1 text-left">
+                            <span className="font-medium text-zinc-200">User Profile</span>
+                            <span className="text-xs text-zinc-500">Free Plan</span>
+                        </div>
+                        <Settings size={16} className="text-zinc-500" />
+                    </button>
+                </div>
+            </aside>
 
-                        <div ref={messagesEndRef} />
+            {/* Main Chat Area */}
+            <main className="flex-1 flex flex-col min-w-0 relative">
+                {/* Empty state: Greeting + Input centered */}
+                {!hasMessages && (
+                    <div className="flex-1 flex flex-col items-center justify-center w-full max-w-3xl mx-auto px-4">
+                        <div className="w-full mb-8 text-center">
+                            <motion.h1 
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                                className="text-3xl font-semibold text-white mb-3"
+                            >
+                                {greeting}
+                            </motion.h1>
+                            <motion.p
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.2 }}
+                                className="text-zinc-500 text-sm"
+                            >
+                                Select a mode to start querying data.
+                            </motion.p>
+                        </div>
+                        
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.97, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
+                            className="w-full"
+                        >
+                            <AIChatInput onSendMessage={handleSendMessage} />
+                        </motion.div>
                     </div>
+                )}
 
-                    {/* Input pinned to bottom */}
-                    <div className="w-full max-w-3xl pt-2 pb-2 shrink-0">
-                        <ClaudeChatInput onSendMessage={handleSendMessage} />
+                {/* Chat state: Messages + Input at bottom */}
+                {hasMessages && (
+                    <div className="flex-1 flex flex-col h-full">
+                        {/* Messages area */}
+                        <div className="flex-1 w-full max-w-3xl mx-auto overflow-y-auto px-4 pb-4 pt-8 space-y-6 scrollbar-thin">
+                            {messages.map(msg => (
+                                <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`
+                                        max-w-[85%] rounded-2xl px-5 py-3.5 text-[15px] leading-relaxed
+                                        ${msg.role === 'user'
+                                            ? 'bg-zinc-800 text-zinc-100'
+                                            : msg.role === 'error'
+                                                ? 'bg-red-950/50 border border-red-900/50 text-red-200'
+                                                : 'bg-transparent text-zinc-200'
+                                        }
+                                    `}>
+                                        {/* Source badge for user messages */}
+                                        {msg.role === 'user' && (msg.url || msg.fileName) && (
+                                            <div className="text-xs text-[#FF6B2C] mb-2 flex items-center gap-1.5 bg-[#FF6B2C]/10 border border-[#FF6B2C]/20 w-fit px-2 py-1 rounded-md">
+                                                <span className="capitalize font-medium">{msg.source}</span>
+                                                <span className="opacity-50">·</span>
+                                                <span className="truncate max-w-[200px]">{msg.url || msg.fileName}</span>
+                                            </div>
+                                        )}
+                                        <div className="whitespace-pre-wrap">{msg.content}</div>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* Loading indicator */}
+                            {isLoading && (
+                                <div className="flex justify-start">
+                                    <div className="bg-transparent px-5 py-3 flex items-center min-w-[120px]">
+                                        <ThinkingTool state="thinking" />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        {/* Input pinned to bottom */}
+                        <div className="w-full max-w-3xl mx-auto p-4 shrink-0">
+                            <AIChatInput onSendMessage={handleSendMessage} />
+                        </div>
                     </div>
-                </>
-            )}
+                )}
+            </main>
         </div>
     );
 };
