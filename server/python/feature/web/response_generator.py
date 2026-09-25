@@ -19,7 +19,7 @@ def generate_response(question, context_docs):
     context = "\n\n".join(doc.page_content for doc in context_docs)
 
     prompt = f"""
-    Based on the following context from a website, answer the question.
+    Based on the following context from a website, answer the question in detail from the content from the content.
     
     Use only the context provided below.
     

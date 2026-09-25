@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { AIChatInput } from './ui/ai-chat-input';
 import { ThinkingTool } from './ui/thinking-tool';
 import { MarkdownRenderer } from './ui/markdown-renderer';
+import { ResponseStream } from './ui/response-stream';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, MessageSquare, Settings, User, LogIn, Sparkles, ChevronDown, PanelLeft } from 'lucide-react';
 import { Sidebar as AceternitySidebar, SidebarBody } from './ui/sidebar';
@@ -18,6 +19,7 @@ interface ChatMessage {
     url?: string;
     fileName?: string;
     timestamp: Date;
+    animate?: boolean;
 }
 
 interface Conversation {
@@ -301,6 +303,7 @@ const ChatInterface = () => {
                 followUps,
                 source: result.source,
                 timestamp: new Date(),
+                animate: true,
             };
 
             setMessages(prev => [...prev, assistantMsg]);
@@ -562,7 +565,17 @@ const ChatInterface = () => {
                                                     <Sparkles size={14} className="text-[#FF6B2C]" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <MarkdownRenderer content={msg.content} />
+                                                    {msg.animate ? (
+                                                        <ResponseStream 
+                                                            textStream={msg.content} 
+                                                            mode="typewriter"
+                                                            speed={60}
+                                                            className="leading-relaxed"
+                                                            renderer={(text) => <MarkdownRenderer content={text} />}
+                                                        />
+                                                    ) : (
+                                                        <MarkdownRenderer content={msg.content} />
+                                                    )}
                                                 </div>
                                             </div>
 

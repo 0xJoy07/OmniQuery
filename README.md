@@ -45,46 +45,49 @@ Each pipeline follows the same pattern: **Ingest → Chunk → Embed → Store �
 
 - **🧠 RAG Pipeline** — Retrieval-Augmented Generation with ChromaDB vector storage and Google Gemini embeddings
 - **⚡ Groq-Powered LLM** — Lightning-fast inference using `openai/gpt-oss-20b` via the Groq API
+- **🔐 User Authentication** — Secure login and registration powered by JWT, bcrypt, and a Node.js Express backend
+- **💾 Persistent Chat History** — Chat sessions and messages are stored persistently using Supabase (PostgreSQL)
 - **📎 Multi-Format Document Support** — PDF, DOCX, PPTX, XLSX, CSV, TXT, JSON, Markdown, HTML
 - **🎥 YouTube Transcript Analysis** — Automatic transcript extraction and per-video vector collections
 - **🌍 Website Q&A** — Scrape any public URL and ask questions about its content
-- **💬 Modern Chat UI** — Polished, animated chat interface with source badges, file uploads, and thinking indicators
+- **💬 Modern UI & Dashboard** — Polished, animated chat interface and Dashboard (Profile, Settings, History) using Aceternity UI and framer-motion
 - **🎭 Cinematic Intro** — Arc-reveal preloader that cycles through supported source types
-- **🔗 Unified API Proxy** — Next.js API route proxies all requests to the FastAPI backend, eliminating CORS concerns
-- **📝 Follow-Up Questions** — Every answer includes 2–3 context-grounded follow-up suggestions
+- **🔗 Unified API Proxy** — Next.js API route proxies auth requests to Node.js and RAG requests to the FastAPI backend
+- **📝 Follow-Up Questions** — Every answer includes 2–3 context-grounded follow-up suggestions rendered as interactive buttons
 
 ---
 
 ## Architecture
 
-OmniQuery uses a **decoupled client-server architecture** with a Next.js frontend and a Python FastAPI backend.
+OmniQuery uses a **Microservice architecture** with a Next.js frontend, a Node.js/Express backend for Auth/DB, and a Python FastAPI backend for AI/RAG processing.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                       CLIENT (Next.js)                      │
 │                                                             │
-│   page.tsx ──► ChatInterface ──► ClaudeChatInput            │
-│                     │                                       │
-│              POST /api/query                                │
-│                     │                                       │
-│          route.ts (API Proxy)                               │
-└─────────────┬───────────────────────────────────────────────┘
-              │  HTTP (JSON / FormData)
-              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    SERVER (FastAPI + Python)                 │
-│                                                             │
-│   app.py ──► /api/query/web      ──► web_pipeline()         │
-│          ──► /api/query/youtube  ──► youtube_pipeline()      │
-│          ──► /api/query/document ──► doc_pipeline()          │
-│                     │                                       │
-│          ┌──────────┴──────────┐                            │
-│          ▼                     ▼                            │
-│   ┌─────────────┐     ┌──────────────┐                     │
-│   │  ChromaDB   │     │   Groq LLM   │                     │
-│   │  (Vectors)  │     │  (Inference)  │                     │
-│   └─────────────┘     └──────────────┘                     │
-└─────────────────────────────────────────────────────────────┘
+│   Chat / Dashboard ──► API Proxy (app/api/...)              │
+│                                │                            │
+└────────────────────────────────┼────────────────────────────┘
+                                 │
+           ┌─────────────────────┴──────────────────────┐
+           │                                            │
+           ▼                                            ▼
+┌───────────────────────┐                    ┌───────────────────────┐
+│ AUTH / DB (Node.js)   │                    │ RAG / AI (FastAPI)    │
+│                       │                    │                       │
+│ - JWT Auth & bcrypt   │                    │ - Document/Web loaders│
+│ - Express.js API      │                    │ - ChromaDB (Vectors)  │
+│ - Chat History API    │                    │ - Groq LLM Inference  │
+└──────────┬────────────┘                    └───────────────────────┘
+           │                                            
+           ▼                                            
+┌───────────────────────┐                               
+│ SUPABASE (PostgreSQL) │                               
+│                       │                               
+│ - Users Table         │                               
+│ - Conversations       │                               
+│ - Messages            │                               
+└───────────────────────┘                               
 ```
 
 ### Pipeline Flow (per source)
@@ -111,11 +114,12 @@ flowchart LR
 | [React 19](https://react.dev/) | UI library |
 | [TypeScript](https://www.typescriptlang.org/) | Type safety |
 | [Tailwind CSS 4](https://tailwindcss.com/) | Utility-first styling |
+| [Aceternity UI](https://ui.aceternity.com/) | Advanced animated UI components (Sidebars) |
 | [Motion (Framer Motion)](https://motion.dev/) | Animations & transitions |
 | [shadcn/ui](https://ui.shadcn.com/) | Component primitives |
 | [Lucide React](https://lucide.dev/) | Icon system |
 
-### Backend
+### Backend (AI & RAG)
 | Technology | Purpose |
 |-----------|---------|
 | [FastAPI](https://fastapi.tiangolo.com/) | Async Python web framework |
@@ -123,7 +127,13 @@ flowchart LR
 | [ChromaDB](https://www.trychroma.com/) | Vector database for embeddings |
 | [Google Gemini Embeddings](https://ai.google.dev/) | `gemini-embedding-001` for text embedding |
 | [Groq](https://groq.com/) | Ultra-fast LLM inference (`openai/gpt-oss-20b`) |
-| [Uvicorn](https://www.uvicorn.org/) | ASGI server |
+
+### Backend (Auth & Database)
+| Technology | Purpose |
+|-----------|---------|
+| [Node.js & Express](https://expressjs.com/) | Authentication & Chat History API (`server/node`) |
+| [Supabase](https://supabase.com/) | PostgreSQL database for users and conversations |
+| [JWT & bcryptjs](https://jwt.io/) | Secure token-based authentication and password hashing |
 
 ---
 
@@ -351,7 +361,19 @@ OmniQuery/
 │   │           ├── chromaDB.py     # Vector store operations
 │   │           ├── response_generator.py  # Groq LLM response
 │   │           └── doc_main.py     # Pipeline orchestrator
-│   └── fastapi/                    # (Reserved for future use)
+│   └── node/                       # Node.js backend (Auth & DB)
+│       ├── server.js               # Express application
+│       ├── config/
+│       │   └── supabase.js         # Supabase client config
+│       ├── controllers/
+│       │   ├── authController.js   # Login/Register handlers
+│       │   └── chatController.js   # Chat history/conversations logic
+│       ├── middleware/
+│       │   └── authMiddleware.js   # JWT verification
+│       ├── routes/
+│       │   ├── authRoutes.js       # Auth endpoints
+│       │   └── chatRoutes.js       # Chat endpoints
+│       └── supabase_setup.sql      # Database schema (PostgreSQL)
 │
 ├── .gitignore
 └── README.md                       # ← You are here

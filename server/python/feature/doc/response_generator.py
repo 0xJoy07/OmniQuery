@@ -23,7 +23,7 @@ def generate_response(question, context_docs):
     )
 
     prompt = f"""
-    You are an AI assistant that answers questions about YouTube videos.
+    You are an AI assistant that answers questions about YouTube videos in detail from the content from the content.
 
     Use only the transcript context provided below.
 
