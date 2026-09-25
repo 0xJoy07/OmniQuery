@@ -13,53 +13,60 @@
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> •
-  <a href="#architecture">Architecture</a> •
-  <a href="#tech-stack">Tech Stack</a> •
-  <a href="#getting-started">Getting Started</a> •
-  <a href="#api-reference">API Reference</a> •
-  <a href="#project-structure">Project Structure</a> •
-  <a href="#contributing">Contributing</a> •
+  <a href="#features">Features</a> &bull;
+  <a href="#architecture">Architecture</a> &bull;
+  <a href="#tech-stack">Tech Stack</a> &bull;
+  <a href="#getting-started">Getting Started</a> &bull;
+  <a href="#api-reference">API Reference</a> &bull;
+  <a href="#project-structure">Project Structure</a> &bull;
+  <a href="#contributing">Contributing</a> &bull;
   <a href="#license">License</a>
 </p>
 
-<br />
+---
+
+## Demo
+
+<p align="center">
+  <video src="video/export-1790355447303.mp4" controls="controls" width="100%" />
+</p>
 
 ---
 
 ## Overview
 
-**OmniQuery** is a full-stack Retrieval-Augmented Generation (RAG) application that lets users query information from three distinct source types through a single, elegant chat interface:
+OmniQuery is a full-stack Retrieval-Augmented Generation (RAG) application that lets users query information from three distinct source types through a single chat interface:
 
-| Source | What it does |
+| Source | Description |
 |--------|-------------|
-| 🌐 **Web Pages** | Scrapes and indexes any public URL, then answers questions grounded in the page content |
-| 🎬 **YouTube Videos** | Extracts video transcripts, chunks and embeds them, then answers questions about the video |
-| 📄 **Documents** | Accepts PDF, DOCX, PPTX, XLSX, CSV, TXT, JSON, Markdown, and HTML uploads for Q&A |
+| Web Pages | Scrapes and indexes any public URL, then answers questions grounded in the page content |
+| YouTube Videos | Extracts video transcripts, chunks and embeds them, then answers questions about the video |
+| Documents | Accepts PDF, DOCX, PPTX, XLSX, CSV, TXT, JSON, Markdown, and HTML uploads for Q&A |
 
-Each pipeline follows the same pattern: **Ingest → Chunk → Embed → Store → Retrieve → Generate** — ensuring accurate, hallucination-resistant answers backed by source material.
+Each pipeline follows the same pattern: **Ingest → Chunk → Embed → Store → Retrieve → Generate** — keeping answers accurate and grounded in the source material rather than model hallucinations.
 
 ---
 
 ## Features
 
-- **🧠 RAG Pipeline** — Retrieval-Augmented Generation with ChromaDB vector storage and Google Gemini embeddings
-- **⚡ Groq-Powered LLM** — Lightning-fast inference using `openai/gpt-oss-20b` via the Groq API
-- **🔐 User Authentication** — Secure login and registration powered by JWT, bcrypt, and a Node.js Express backend
-- **💾 Persistent Chat History** — Chat sessions and messages are stored persistently using Supabase (PostgreSQL)
-- **📎 Multi-Format Document Support** — PDF, DOCX, PPTX, XLSX, CSV, TXT, JSON, Markdown, HTML
-- **🎥 YouTube Transcript Analysis** — Automatic transcript extraction and per-video vector collections
-- **🌍 Website Q&A** — Scrape any public URL and ask questions about its content
-- **💬 Modern UI & Dashboard** — Polished, animated chat interface and Dashboard (Profile, Settings, History) using Aceternity UI and framer-motion
-- **🎭 Cinematic Intro** — Arc-reveal preloader that cycles through supported source types
-- **🔗 Unified API Proxy** — Next.js API route proxies auth requests to Node.js and RAG requests to the FastAPI backend
-- **📝 Follow-Up Questions** — Every answer includes 2–3 context-grounded follow-up suggestions rendered as interactive buttons
+- **RAG Pipeline** — Retrieval-Augmented Generation with ChromaDB vector storage and Google Gemini embeddings
+- **Groq-Powered LLM** — Fast inference using `openai/gpt-oss-20b` via the Groq API
+- **User Authentication** — Secure login and registration powered by JWT, bcrypt, and a Node.js Express backend
+- **Persistent Chat History** — Chat sessions and messages are stored using Supabase (PostgreSQL). The AI maintains conversational context via a dedicated `chat_memory` table.
+- **Shareable Chat Links** — Chats sync to URL parameters (e.g., `?id=...`) for easy bookmarking and sharing
+- **Multi-Format Document Support** — PDF, DOCX, PPTX, XLSX, CSV, TXT, JSON, Markdown, HTML
+- **YouTube Transcript Analysis** — Automatic transcript extraction and per-video vector collections
+- **Website Q&A** — Scrape any public URL and ask questions about its content
+- **Modern UI and Dashboard** — Animated chat interface and Dashboard (Profile, Settings, History) built with Aceternity UI and Framer Motion
+- **Cinematic Intro** — Arc-reveal preloader that cycles through supported source types
+- **Unified API Proxy** — Next.js API routes proxy auth requests to Node.js and RAG requests to the FastAPI backend
+- **Follow-Up Questions** — Every answer includes 2–3 context-grounded follow-up suggestions rendered as interactive buttons
 
 ---
 
 ## Architecture
 
-OmniQuery uses a **Microservice architecture** with a Next.js frontend, a Node.js/Express backend for Auth/DB, and a Python FastAPI backend for AI/RAG processing.
+OmniQuery uses a microservice architecture with a Next.js frontend, a Node.js/Express backend for auth and database operations, and a Python FastAPI backend for AI and RAG processing.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -79,15 +86,16 @@ OmniQuery uses a **Microservice architecture** with a Next.js frontend, a Node.j
 │ - Express.js API      │                    │ - ChromaDB (Vectors)  │
 │ - Chat History API    │                    │ - Groq LLM Inference  │
 └──────────┬────────────┘                    └───────────────────────┘
-           │                                            
-           ▼                                            
-┌───────────────────────┐                               
-│ SUPABASE (PostgreSQL) │                               
-│                       │                               
-│ - Users Table         │                               
-│ - Conversations       │                               
-│ - Messages            │                               
-└───────────────────────┘                               
+           │
+           ▼
+┌───────────────────────┐
+│ SUPABASE (PostgreSQL) │
+│                       │
+│ - Users Table         │
+│ - Conversations       │
+│ - Messages            │
+│ - Chat Memory         │
+└───────────────────────┘
 ```
 
 ### Pipeline Flow (per source)
@@ -108,32 +116,35 @@ flowchart LR
 ## Tech Stack
 
 ### Frontend
+
 | Technology | Purpose |
 |-----------|---------|
-| [Next.js 16](https://nextjs.org/) | React framework with App Router & API routes |
+| [Next.js 16](https://nextjs.org/) | React framework with App Router and API routes |
 | [React 19](https://react.dev/) | UI library |
 | [TypeScript](https://www.typescriptlang.org/) | Type safety |
 | [Tailwind CSS 4](https://tailwindcss.com/) | Utility-first styling |
-| [Aceternity UI](https://ui.aceternity.com/) | Advanced animated UI components (Sidebars) |
-| [Motion (Framer Motion)](https://motion.dev/) | Animations & transitions |
+| [Aceternity UI](https://ui.aceternity.com/) | Advanced animated UI components |
+| [Motion (Framer Motion)](https://motion.dev/) | Animations and transitions |
 | [shadcn/ui](https://ui.shadcn.com/) | Component primitives |
 | [Lucide React](https://lucide.dev/) | Icon system |
 
-### Backend (AI & RAG)
+### Backend — AI and RAG
+
 | Technology | Purpose |
 |-----------|---------|
 | [FastAPI](https://fastapi.tiangolo.com/) | Async Python web framework |
 | [LangChain](https://www.langchain.com/) | RAG orchestration (loaders, splitters, chains) |
 | [ChromaDB](https://www.trychroma.com/) | Vector database for embeddings |
 | [Google Gemini Embeddings](https://ai.google.dev/) | `gemini-embedding-001` for text embedding |
-| [Groq](https://groq.com/) | Ultra-fast LLM inference (`openai/gpt-oss-20b`) |
+| [Groq](https://groq.com/) | LLM inference (`openai/gpt-oss-20b`) |
 
-### Backend (Auth & Database)
+### Backend — Auth and Database
+
 | Technology | Purpose |
 |-----------|---------|
-| [Node.js & Express](https://expressjs.com/) | Authentication & Chat History API (`server/node`) |
+| [Node.js and Express](https://expressjs.com/) | Authentication and Chat History API (`server/node`) |
 | [Supabase](https://supabase.com/) | PostgreSQL database for users and conversations |
-| [JWT & bcryptjs](https://jwt.io/) | Secure token-based authentication and password hashing |
+| [JWT and bcryptjs](https://jwt.io/) | Token-based authentication and password hashing |
 
 ---
 
@@ -141,12 +152,12 @@ flowchart LR
 
 ### Prerequisites
 
-- **Node.js** ≥ 18
-- **Python** ≥ 3.10
-- **npm** (comes with Node.js)
+- **Node.js** v18 or higher
+- **Python** 3.10 or higher
+- **npm** (bundled with Node.js)
 - API keys for:
-  - [Google AI (Gemini)](https://aistudio.google.com/apikey) — for embeddings
-  - [Groq](https://console.groq.com/keys) — for LLM inference
+  - [Google AI (Gemini)](https://aistudio.google.com/apikey) — embeddings
+  - [Groq](https://console.groq.com/keys) — LLM inference
 
 ### 1. Clone the Repository
 
@@ -155,10 +166,9 @@ git clone https://github.com/0xJoy07/OmniQuery.git
 cd OmniQuery
 ```
 
-### 2. Backend Setup
+### 2. Python Backend Setup
 
 ```bash
-# Navigate to the Python server
 cd server/python
 
 # Create and activate a virtual environment
@@ -166,6 +176,7 @@ python -m venv .venv
 
 # Windows
 .venv\Scripts\activate
+
 # macOS / Linux
 source .venv/bin/activate
 
@@ -173,14 +184,14 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Create a `.env` file in `server/python/`:
+Create a `.env` file inside `server/python/`:
 
 ```env
 GOOGLE_API_KEY=your_google_api_key_here
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-Start the backend server:
+Start the backend:
 
 ```bash
 python app.py
@@ -201,16 +212,13 @@ curl http://localhost:8000/api/health
 # From the project root
 cd client
 
-# Install dependencies
 npm install
-
-# Start the development server
 npm run dev
 ```
 
 The app will be available at `http://localhost:3000`.
 
-> **Note:** The Next.js API route at `/api/query` automatically proxies requests to the FastAPI backend at `http://localhost:8000`. To change the backend URL, set the `FASTAPI_BASE_URL` environment variable in the client.
+> **Note:** The Next.js API route at `/api/query` automatically proxies requests to the FastAPI backend at `http://localhost:8000`. To point to a different backend, set the `FASTAPI_BASE_URL` environment variable in the client.
 
 ---
 
@@ -287,6 +295,7 @@ Content-Type: multipart/form-data
 ```
 
 **Form Fields:**
+
 | Field | Type | Description |
 |-------|------|-------------|
 | `file` | File | Document to query (max 50 MB) |
@@ -309,74 +318,74 @@ Content-Type: multipart/form-data
 ```
 OmniQuery/
 ├── architechture/                  # Architecture diagrams (Mermaid)
-│   ├── doc.architecture.md         # Document pipeline diagram
-│   ├── web.architecture.md         # Web pipeline diagram
-│   └── yt.architecture.md          # YouTube pipeline diagram
+│   ├── doc.architecture.md
+│   ├── web.architecture.md
+│   └── yt.architecture.md
 │
 ├── client/                         # Next.js frontend
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── api/query/route.ts  # API proxy to FastAPI backend
-│   │   │   ├── globals.css         # Global styles & theme variables
-│   │   │   ├── layout.tsx          # Root layout (Geist font, dark mode)
-│   │   │   └── page.tsx            # Main page (Hero + Chat)
+│   │   │   ├── globals.css
+│   │   │   ├── layout.tsx
+│   │   │   └── page.tsx
 │   │   ├── components/
-│   │   │   ├── chat-interface.tsx   # Chat logic & message rendering
+│   │   │   ├── chat-interface.tsx
 │   │   │   └── ui/
-│   │   │       ├── arc-preloader-hero.tsx      # Animated intro sequence
-│   │   │       ├── claude-style-chat-input.tsx # Rich input with file upload
-│   │   │       ├── thinking-tool.tsx           # Loading/thinking indicator
-│   │   │       └── button.tsx                  # Button component
+│   │   │       ├── arc-preloader-hero.tsx
+│   │   │       ├── claude-style-chat-input.tsx
+│   │   │       ├── thinking-tool.tsx
+│   │   │       └── button.tsx
 │   │   └── lib/
-│   │       └── utils.ts            # Utility functions (cn, etc.)
+│   │       └── utils.ts
 │   ├── package.json
 │   ├── next.config.ts
 │   └── tsconfig.json
 │
-├── server/                         # Python backend
-│   ├── python/
-│   │   ├── app.py                  # FastAPI application & endpoints
-│   │   ├── main.py                 # CLI entry point (for testing)
-│   │   ├── requirements.txt        # Python dependencies
-│   │   └── feature/                # RAG pipeline modules
-│   │       ├── __init__.py         # Public API exports
-│   │       ├── web/                # Web scraping pipeline
-│   │       │   ├── webLoader.py    # URL content scraper
-│   │       │   ├── chuncking.py    # Text splitter
-│   │       │   ├── embed.py        # Gemini embedding model
-│   │       │   ├── chromaDB.py     # Vector store operations
-│   │       │   ├── response_generator.py  # Groq LLM response
-│   │       │   └── web_main.py     # Pipeline orchestrator
-│   │       ├── vid/                # YouTube pipeline
-│   │       │   ├── yt_loader.py    # Transcript extractor
-│   │       │   ├── chunking.py     # Text splitter
-│   │       │   ├── embed.py        # Gemini embedding model
-│   │       │   ├── chromaDB.py     # Vector store (per-video collections)
-│   │       │   ├── response_generator.py  # Groq LLM response
-│   │       │   └── yt_main.py      # Pipeline orchestrator
-│   │       └── doc/                # Document pipeline
-│   │           ├── doc_loader.py   # Multi-format document loader
-│   │           ├── chunking.py     # Text splitter
-│   │           ├── embed.py        # Gemini embedding model
-│   │           ├── chromaDB.py     # Vector store operations
-│   │           ├── response_generator.py  # Groq LLM response
-│   │           └── doc_main.py     # Pipeline orchestrator
-│   └── node/                       # Node.js backend (Auth & DB)
-│       ├── server.js               # Express application
+├── server/
+│   ├── python/                     # FastAPI + RAG backend
+│   │   ├── app.py
+│   │   ├── main.py
+│   │   ├── requirements.txt
+│   │   └── feature/
+│   │       ├── __init__.py
+│   │       ├── web/
+│   │       │   ├── webLoader.py
+│   │       │   ├── chuncking.py
+│   │       │   ├── embed.py
+│   │       │   ├── chromaDB.py
+│   │       │   ├── response_generator.py
+│   │       │   └── web_main.py
+│   │       ├── vid/
+│   │       │   ├── yt_loader.py
+│   │       │   ├── chunking.py
+│   │       │   ├── embed.py
+│   │       │   ├── chromaDB.py
+│   │       │   ├── response_generator.py
+│   │       │   └── yt_main.py
+│   │       └── doc/
+│   │           ├── doc_loader.py
+│   │           ├── chunking.py
+│   │           ├── embed.py
+│   │           ├── chromaDB.py
+│   │           ├── response_generator.py
+│   │           └── doc_main.py
+│   └── node/                       # Express backend (Auth + DB)
+│       ├── server.js
 │       ├── config/
-│       │   └── supabase.js         # Supabase client config
+│       │   └── supabase.js
 │       ├── controllers/
-│       │   ├── authController.js   # Login/Register handlers
-│       │   └── chatController.js   # Chat history/conversations logic
+│       │   ├── authController.js
+│       │   └── chatController.js
 │       ├── middleware/
-│       │   └── authMiddleware.js   # JWT verification
+│       │   └── authMiddleware.js
 │       ├── routes/
-│       │   ├── authRoutes.js       # Auth endpoints
-│       │   └── chatRoutes.js       # Chat endpoints
-│       └── supabase_setup.sql      # Database schema (PostgreSQL)
+│       │   ├── authRoutes.js
+│       │   └── chatRoutes.js
+│       └── supabase_setup.sql
 │
 ├── .gitignore
-└── README.md                       # ← You are here
+└── README.md
 ```
 
 ---
@@ -385,48 +394,47 @@ OmniQuery/
 
 | Variable | Where | Required | Description |
 |----------|-------|----------|-------------|
-| `GOOGLE_API_KEY` | `server/python/.env` | ✅ | Google AI API key for Gemini embeddings |
-| `GROQ_API_KEY` | `server/python/.env` | ✅ | Groq API key for LLM inference |
-| `CORS_ORIGINS` | `server/python/.env` | ❌ | Comma-separated allowed origins (default: `http://localhost:3000`) |
-| `FASTAPI_BASE_URL` | `client/.env.local` | ❌ | Backend URL (default: `http://localhost:8000`) |
+| `GOOGLE_API_KEY` | `server/python/.env` | Yes | Google AI API key for Gemini embeddings |
+| `GROQ_API_KEY` | `server/python/.env` | Yes | Groq API key for LLM inference |
+| `CORS_ORIGINS` | `server/python/.env` | No | Comma-separated allowed origins (default: `http://localhost:3000`) |
+| `FASTAPI_BASE_URL` | `client/.env.local` | No | Backend URL (default: `http://localhost:8000`) |
 
 ---
 
 ## Usage
 
-1. **Start both servers** (backend on `:8000`, frontend on `:3000`)
-2. **Open** `http://localhost:3000` in your browser
-3. **Watch** the cinematic intro cycle through supported source types
-4. **Select a source** in the chat input (Web, YouTube, or Document)
-5. **Provide context** — paste a URL or upload a document
-6. **Ask your question** and receive a grounded answer with follow-up suggestions
+1. Start both servers — Python backend on `:8000`, Next.js frontend on `:3000`
+2. Open `http://localhost:3000` in your browser
+3. Select a source in the chat input: Web, YouTube, or Document
+4. Paste a URL or upload a document to provide context
+5. Ask your question and receive a grounded answer with follow-up suggestions
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Here's how to get started:
+Contributions are welcome. Here is the standard workflow:
 
-1. **Fork** the repository
-2. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
-3. **Commit your changes** (`git commit -m 'Add amazing feature'`)
-4. **Push to the branch** (`git push origin feature/amazing-feature`)
-5. **Open a Pull Request**
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature-name`
+3. Commit your changes: `git commit -m 'Add your feature'`
+4. Push to your branch: `git push origin feature/your-feature-name`
+5. Open a Pull Request
+
+Please keep PRs focused and include a clear description of what changed and why.
 
 ---
 
 ## Contributors
 
-<table>
-  <tr>
-    <td align="center"><strong>Joy Sengupta</strong></td>
-    <td align="center"><strong>Anushikha Kundu</strong></td>
-    <td align="center"><strong>Srijan Mandal</strong></td>
-  </tr>
-</table>
+| Name | Role |
+|------|------|
+| Joy Sengupta | Full-stack development, RAG pipeline |
+| Anushikha Kundu | Contributor |
+| Srijan Mandal | Contributor |
 
 ---
 
 ## License
 
-This project is part of an industrial training initiative under **Euphoria GenX**. Please check with the project maintainers for licensing details.
+This project was built as part of an industrial training initiative under **Euphoria GenX**. Please contact the project maintainers for licensing details before reuse or redistribution.
