@@ -37,3 +37,39 @@ CREATE INDEX IF NOT EXISTS idx_blacklisted_tokens_token ON blacklisted_tokens (t
 --        '0 * * * *',
 --        $$ DELETE FROM blacklisted_tokens WHERE expires_at < now() $$
 --    );
+
+-- ============================================================
+-- Chat Storage Tables
+-- ============================================================
+
+-- 4. Conversations table (each chat session)
+CREATE TABLE IF NOT EXISTS conversations (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title TEXT NOT NULL DEFAULT 'New Chat',
+    source TEXT DEFAULT 'website' CHECK (source IN ('website', 'youtube', 'document')),
+    source_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Index for fast lookups by user
+CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations (user_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_updated_at ON conversations (updated_at DESC);
+
+-- 5. Messages table (individual messages within a conversation)
+CREATE TABLE IF NOT EXISTS messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'error')),
+    content TEXT NOT NULL,
+    follow_ups JSONB DEFAULT '[]'::jsonb,
+    source TEXT,
+    url TEXT,
+    file_name TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Index for fast message retrieval within a conversation
+CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages (conversation_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages (conversation_id, created_at ASC);

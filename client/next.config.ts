@@ -17,6 +17,11 @@ const nextConfig: NextConfig = {
       source: '/api/health',
       destination: 'http://localhost:5001/api/health',
     },
+    // Chat storage routes → Express
+    {
+      source: '/api/chat/:path*',
+      destination: 'http://localhost:5001/api/chat/:path*',
+    },
   ],
 };
 

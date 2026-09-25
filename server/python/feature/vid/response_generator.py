@@ -28,9 +28,10 @@ def generate_response(question, context_docs):
 
     Use only the transcript context provided below.
 
-    If the answer cannot be found in the transcript, clearly say that
-    the information is not available in the video.
-
+    If the answer cannot be found in the transcript, you MUST respond EXACTLY with this phrase:
+    "The content you provided does not contain your query. Perhaps you can ask from the follow ups"
+    Do not add any other conversational text to the answer. Just add the follow ups from the doc.
+    
     Transcript context:
     {context}
 
@@ -48,7 +49,8 @@ def generate_response(question, context_docs):
     - Do not introduce topics outside the transcript
     - Keep questions concise and curiosity-driven
 
-    Follow-up Questions:
+    You MUST prefix the follow-up questions section exactly with this marker:
+    ###FOLLOW_UP_QUESTIONS###
     1.
     2.
     3.

@@ -48,6 +48,18 @@ export const AIChatInput = ({ onSendMessage }: ChatInputProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Read URL params to set initial active tab
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const typeParam = params.get('type') as TabType;
+            if (typeParam && TABS.some(t => t.id === typeParam)) {
+                setActiveTab(typeParam);
+                setIsExpanded(true); // Automatically expand the input area
+            }
+        }
+    }, []);
+
     // Cycle placeholder prompt smoothly
     useEffect(() => {
         if (isExpanded || value) return;

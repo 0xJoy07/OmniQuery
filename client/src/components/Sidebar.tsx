@@ -1,43 +1,62 @@
 "use client";
 
-import Link from 'next/link';
+import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, User, History, Settings } from 'lucide-react';
+import { Sidebar as AceternitySidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
 
-const LINKS = [
-    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/dashboard/profile', label: 'Profile', icon: User },
-    { href: '/dashboard/history', label: 'History', icon: History },
-    { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+const MAIN_LINKS = [
+    { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} className="text-neutral-200 shrink-0" /> },
+    { href: '/dashboard/profile', label: 'Profile', icon: <User size={20} className="text-neutral-200 shrink-0" /> },
+    { href: '/dashboard/history', label: 'History', icon: <History size={20} className="text-neutral-200 shrink-0" /> },
 ];
+
+const SETTINGS_LINK = { href: '/dashboard/settings', label: 'Settings', icon: <Settings size={20} className="text-neutral-200 shrink-0" /> };
 
 export default function Sidebar() {
     const pathname = usePathname();
+    const [open, setOpen] = useState(false);
 
     return (
-        <aside className="w-full md:w-64 bg-slate-950 border-r border-slate-800 shrink-0 md:min-h-screen">
-            <div className="p-4 overflow-x-auto md:overflow-visible">
-                <nav className="flex md:flex-col gap-2 min-w-max md:min-w-0">
-                    {LINKS.map((link) => {
-                        const isActive = pathname === link.href;
-                        const Icon = link.icon;
-                        return (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                                    isActive
-                                        ? 'bg-[#FF6B2C]/10 text-[#FF6B2C] border border-[#FF6B2C]/20'
-                                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-transparent'
-                                }`}
-                            >
-                                <Icon size={18} />
-                                {link.label}
-                            </Link>
-                        );
-                    })}
-                </nav>
-            </div>
-        </aside>
+        <AceternitySidebar open={open} setOpen={setOpen}>
+            <SidebarBody className="justify-between gap-10 !px-0 py-4">
+                <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden px-2">
+                    <div className="mt-4 flex flex-col gap-2">
+                        {MAIN_LINKS.map((link) => {
+                            const isActive = pathname === link.href;
+                            return (
+                                <SidebarLink
+                                    key={link.href}
+                                    link={{
+                                        ...link,
+                                        icon: React.cloneElement(link.icon as React.ReactElement, {
+                                            className: isActive ? 'text-[#FF6B2C] shrink-0' : 'text-neutral-400 group-hover/sidebar:text-neutral-200 shrink-0'
+                                        })
+                                    }}
+                                    className={`rounded-lg transition-colors ${
+                                        isActive ? 'bg-[#FF6B2C]/10' : 'hover:bg-zinc-800/50'
+                                    }`}
+                                />
+                            );
+                        })}
+                    </div>
+                </div>
+                
+                {/* Settings pinned to bottom via justify-between */}
+                <div className="shrink-0 pb-4 px-2">
+                    <SidebarLink
+                        link={{
+                            ...SETTINGS_LINK,
+                            icon: React.cloneElement(SETTINGS_LINK.icon as React.ReactElement, {
+                                className: pathname === SETTINGS_LINK.href ? 'text-[#FF6B2C] shrink-0' : 'text-neutral-400 group-hover/sidebar:text-neutral-200 shrink-0'
+                            })
+                        }}
+                        className={`rounded-lg transition-colors ${
+                            pathname === SETTINGS_LINK.href ? 'bg-[#FF6B2C]/10' : 'hover:bg-zinc-800/50'
+                        }`}
+                    />
+                </div>
+            </SidebarBody>
+        </AceternitySidebar>
     );
 }

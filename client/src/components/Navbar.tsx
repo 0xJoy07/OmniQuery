@@ -13,7 +13,7 @@ export default async function Navbar() {
     }
 
     return (
-        <nav className="w-full bg-slate-950 border-b border-slate-800 text-slate-100">
+        <nav className="relative z-50 w-full bg-black/40 backdrop-blur-xl border-b border-white/10 text-neutral-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Left - Logo */}
@@ -27,7 +27,7 @@ export default async function Navbar() {
                     </Link>
 
                     {/* Center - Links */}
-                    <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
+                    <div className="hidden md:flex items-center gap-6 text-sm font-medium text-neutral-400">
                         <Link href="/" className="hover:text-white transition-colors">Home</Link>
                         <Link href="/chat" className="hover:text-white transition-colors">Chat</Link>
                         <Link href="/dashboard/profile" className="hover:text-white transition-colors">Profile</Link>
@@ -38,7 +38,7 @@ export default async function Navbar() {
                         {!user ? (
                             <Link
                                 href="/login"
-                                className="text-sm font-medium px-4 py-2 rounded-lg border border-slate-700 hover:border-slate-500 hover:bg-slate-800 transition-colors"
+                                className="text-sm font-medium px-4 py-2 rounded-lg border border-neutral-700 hover:border-neutral-500 hover:bg-neutral-800 transition-colors"
                             >
                                 Login
                             </Link>
@@ -48,20 +48,20 @@ export default async function Navbar() {
                                     <div className="w-8 h-8 rounded-full bg-[#FF6B2C]/20 border border-[#FF6B2C]/50 flex items-center justify-center text-[#FF6B2C] font-semibold text-sm">
                                         {(user.name as string)?.charAt(0).toUpperCase() || 'U'}
                                     </div>
-                                    <ChevronDown size={14} className="text-slate-400" />
+                                    <ChevronDown size={14} className="text-neutral-400" />
                                 </button>
 
                                 {/* Dropdown */}
-                                <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-xl shadow-black/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                                <div className="absolute right-0 mt-2 w-48 bg-neutral-900 border border-neutral-800 rounded-xl shadow-xl shadow-black/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                                     <div className="p-2 space-y-1">
-                                        <div className="px-3 py-2 border-b border-slate-800 mb-1">
+                                        <div className="px-3 py-2 border-b border-neutral-800 mb-1">
                                             <p className="text-sm font-medium text-white truncate">{(user.name as string) || 'User'}</p>
-                                            <p className="text-xs text-slate-400 truncate">{(user.email as string) || ''}</p>
+                                            <p className="text-xs text-neutral-400 truncate">{(user.email as string) || ''}</p>
                                         </div>
-                                        <Link href="/dashboard/profile" className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors">
+                                        <Link href="/dashboard/profile" className="flex items-center gap-2 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white rounded-lg transition-colors">
                                             <User size={14} /> Profile
                                         </Link>
-                                        <Link href="/dashboard/settings" className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors">
+                                        <Link href="/dashboard/settings" className="flex items-center gap-2 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white rounded-lg transition-colors">
                                             <Settings size={14} /> Settings
                                         </Link>
                                         <form action={async () => {

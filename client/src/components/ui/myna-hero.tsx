@@ -14,12 +14,18 @@ import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button
 import { FeaturesSectionWithHoverEffects } from "@/components/ui/feature-section-with-hover-effects";
 import Team from "@/components/ui/team-01";
 import Link from "next/link";
+import gsap from "gsap";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollToPlugin);
+}
 
 const navigationItems = [
-  { title: "WEB PAGES", href: "#" },
-  { title: "YOUTUBE VIDEOS", href: "#" },
-  { title: "DOCUMENTS", href: "#" },
-  { title: "ABOUT US", href: "#" },
+  { title: "WEB PAGES", href: "/chat?type=website" },
+  { title: "YOUTUBE VIDEOS", href: "/chat?type=youtube" },
+  { title: "DOCUMENTS", href: "/chat?type=document" },
+  { title: "ABOUT US", href: "#about" },
 ];
 
 const labels = [
@@ -34,6 +40,17 @@ export function MynaHero() {
   const ref = React.useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.1 });
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      gsap.to(window, {
+        duration: 1,
+        scrollTo: href,
+        ease: "power2.inOut"
+      });
+    }
+  };
 
   React.useEffect(() => {
     // Check auth via API (httpOnly cookies can't be read by JS)
@@ -77,6 +94,7 @@ export function MynaHero() {
               <a
                 key={item.title}
                 href={item.href}
+                onClick={(e) => handleNavClick(e, item.href)}
                 className="text-sm font-mono text-foreground hover:text-[#FF6B2C] transition-colors"
               >
                 {item.title}
@@ -104,6 +122,7 @@ export function MynaHero() {
                     <a
                       key={item.title}
                       href={item.href}
+                      onClick={(e) => handleNavClick(e, item.href)}
                       className="text-sm font-mono text-foreground hover:text-[#FF6B2C] transition-colors"
                     >
                       {item.title}
