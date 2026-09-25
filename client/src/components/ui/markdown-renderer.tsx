@@ -117,9 +117,9 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                 ),
 
                 // List items
-                li: ({ children, ordered, ...props }) => (
+                li: ({ children, ...props }) => (
                     <li className="text-[15px] leading-7 text-zinc-300 flex items-start gap-2" {...props}>
-                        {!(props as Record<string, unknown>).ordered && (
+                        {!(props as any).ordered && (
                             <span className="mt-2.5 w-1.5 h-1.5 rounded-full bg-[#FF6B2C]/60 shrink-0" />
                         )}
                         <span className="flex-1">{children}</span>

@@ -159,6 +159,15 @@ const addMessage = async (req, res) => {
 
         if (msgErr) throw msgErr;
 
+        // Insert into memory table specifically for AI Context
+        if (role === 'user' || role === 'assistant') {
+            await supabase.from('chat_memory').insert({
+                conversation_id: id,
+                role,
+                content,
+            });
+        }
+
         // Update conversation's updated_at + auto-title from first user message
         const updates = { updated_at: new Date().toISOString() };
 

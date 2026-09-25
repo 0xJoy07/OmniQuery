@@ -4,21 +4,23 @@ from .chromaDB import save_to_chroma, load_chroma
 from .response_generator import generate_response
 
 
-def doc_pipeline(file_path, question):
+def doc_pipeline(file_path, question, history=[]):
 
-    docs = load_document(file_path)
-    chunks = chunk_docs(docs)
+    # Only process the file if it was uploaded
+    if file_path:
+        docs = load_document(file_path)
+        chunks = chunk_docs(docs)
 
-    print("Total chunks:", len(chunks))
+        print("Total chunks:", len(chunks))
 
-    save_to_chroma(chunks)
+        save_to_chroma(chunks)
 
-    print("Document data saved in db/doc_chroma")
+        print("Document data saved in db/doc_chroma")
 
     vector_db = load_chroma()
     results = vector_db.similarity_search(question, k=3)
 
-    answer = generate_response(question, results)
+    answer = generate_response(question, results, history)
 
     return answer
 

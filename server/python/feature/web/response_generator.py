@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 
 
-def generate_response(question, context_docs):
+def generate_response(question, context_docs, history=[]):
     load_dotenv()
     api_key = os.getenv("GROQ_API_KEY")
 
@@ -17,9 +17,14 @@ def generate_response(question, context_docs):
     )
 
     context = "\n\n".join(doc.page_content for doc in context_docs)
+    
+    # Format chat history
+    formatted_history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in history])
+    if not formatted_history:
+        formatted_history = "No previous history."
 
     prompt = f"""
-    Based on the following context from a website, answer the question in detail from the content from the content.
+    Based on the following context from a website, answer the question in detail from the content.
     
     Use only the context provided below.
     
@@ -28,6 +33,9 @@ def generate_response(question, context_docs):
     Do not add any other conversational text to the answer. Just add the follow ups from the doc.
 
     Context: {context}
+    
+    Chat History:
+    {formatted_history}
 
     Question: {question}
 

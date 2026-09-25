@@ -73,3 +73,15 @@ CREATE TABLE IF NOT EXISTS messages (
 -- Index for fast message retrieval within a conversation
 CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages (conversation_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages (conversation_id, created_at ASC);
+
+-- 6. Chat Memory table (stores context specifically for AI memory)
+CREATE TABLE IF NOT EXISTS chat_memory (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Index for fast memory retrieval
+CREATE INDEX IF NOT EXISTS idx_chat_memory_conversation_id ON chat_memory (conversation_id, created_at ASC);

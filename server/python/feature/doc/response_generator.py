@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 
 
-def generate_response(question, context_docs):
+def generate_response(question, context_docs, history=[]):
 
     load_dotenv()
 
@@ -22,8 +22,13 @@ def generate_response(question, context_docs):
         doc.page_content for doc in context_docs
     )
 
+    # Format chat history
+    formatted_history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in history])
+    if not formatted_history:
+        formatted_history = "No previous history."
+
     prompt = f"""
-    You are an AI assistant that answers questions about YouTube videos in detail from the content from the content.
+    You are an AI assistant that answers questions about documents in detail from the content.
 
     Use only the transcript context provided below.
 
@@ -33,6 +38,9 @@ def generate_response(question, context_docs):
     
     Transcript context:
     {context}
+
+    Chat History:
+    {formatted_history}
 
     Question:
     {question}

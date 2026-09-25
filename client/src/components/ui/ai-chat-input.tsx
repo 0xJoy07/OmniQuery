@@ -28,6 +28,9 @@ const TABS = [
 type TabType = (typeof TABS)[number]["id"];
 
 interface ChatInputProps {
+    defaultSource?: TabType;
+    defaultUrl?: string;
+    defaultFileName?: string;
     onSendMessage: (data: {
         message: string;
         files: { file: File }[];
@@ -37,13 +40,14 @@ interface ChatInputProps {
     }) => void;
 }
 
-export const AIChatInput = ({ onSendMessage }: ChatInputProps) => {
+export const AIChatInput = ({ onSendMessage, defaultSource, defaultUrl, defaultFileName }: ChatInputProps) => {
     const [promptIndex, setPromptIndex] = useState(0);
     const [isExpanded, setIsExpanded] = useState(false);
     const [value, setValue] = useState("");
-    const [activeTab, setActiveTab] = useState<TabType>("youtube");
-    const [url, setUrl] = useState("");
+    const [activeTab, setActiveTab] = useState<TabType>(defaultSource || "youtube");
+    const [url, setUrl] = useState(defaultUrl || "");
     const [file, setFile] = useState<File | null>(null);
+    const [mockFileName, setMockFileName] = useState(defaultFileName || "");
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -59,6 +63,16 @@ export const AIChatInput = ({ onSendMessage }: ChatInputProps) => {
             }
         }
     }, []);
+
+    // Sync with external defaults (e.g. switching chats)
+    useEffect(() => {
+        if (defaultSource) {
+            setActiveTab(defaultSource);
+            setIsExpanded(true);
+        }
+        if (defaultUrl) setUrl(defaultUrl);
+        if (defaultFileName) setMockFileName(defaultFileName);
+    }, [defaultSource, defaultUrl, defaultFileName]);
 
     // Cycle placeholder prompt smoothly
     useEffect(() => {
@@ -95,6 +109,7 @@ export const AIChatInput = ({ onSendMessage }: ChatInputProps) => {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setFile(e.target.files[0]);
+            setMockFileName("");
         }
     };
 
@@ -114,7 +129,7 @@ export const AIChatInput = ({ onSendMessage }: ChatInputProps) => {
     const isSendDisabled =
         !value.trim() ||
         ((activeTab === 'youtube' || activeTab === 'website') && (!url.trim() || !validUrl)) ||
-        (activeTab === 'document' && !file);
+        (activeTab === 'document' && !file && !mockFileName);
 
     const handleSubmit = (e?: React.FormEvent) => {
         e?.preventDefault();
@@ -290,13 +305,14 @@ export const AIChatInput = ({ onSendMessage }: ChatInputProps) => {
                                                     {file ? 'Change File' : 'Upload File'}
                                                 </button>
                                                 <span className="text-sm text-[#888] truncate max-w-[200px] sm:max-w-sm">
-                                                    {file ? file.name : 'No file selected'}
+                                                    {file ? file.name : (mockFileName ? mockFileName : 'No file selected')}
                                                 </span>
-                                                {file && (
+                                                {(file || mockFileName) && (
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setFile(null);
+                                                            setMockFileName("");
                                                         }}
                                                         className="ml-auto text-[#888] hover:text-[#ccc] p-1"
                                                     >

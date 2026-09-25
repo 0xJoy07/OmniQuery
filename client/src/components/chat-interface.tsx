@@ -74,6 +74,7 @@ async function queryAPI(payload: {
     question: string;
     url?: string;
     file?: File;
+    history?: any[];
 }): Promise<{ answer: string; source: string }> {
     const sourceMap: Record<string, string> = {
         web: 'web',
@@ -87,6 +88,9 @@ async function queryAPI(payload: {
         const formData = new FormData();
         formData.append('file', payload.file, payload.file.name);
         formData.append('question', payload.question);
+        if (payload.history) {
+            formData.append('history', JSON.stringify(payload.history));
+        }
 
         const res = await fetch(`/api/query/${endpoint}`, {
             method: 'POST',
@@ -106,6 +110,7 @@ async function queryAPI(payload: {
         body: JSON.stringify({
             url: payload.url,
             question: payload.question,
+            history: payload.history,
         }),
     });
 
@@ -185,6 +190,7 @@ const ChatInterface = () => {
     const [activeConvoId, setActiveConvoId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [currentContext, setCurrentContext] = useState<{ source: string; url?: string; fileName?: string }>({ source: 'website' });
     const lastContextRef = useRef<{ source: string; url?: string; file?: File }>({ source: 'website' });
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -200,6 +206,13 @@ const ChatInterface = () => {
                 if (res.ok) {
                     setIsLoggedIn(true);
                     chatAPI.list().then(setConversations);
+                    
+                    // Check URL for direct chat link
+                    const params = new URLSearchParams(window.location.search);
+                    const urlId = params.get('id');
+                    if (urlId) {
+                        loadConversation(urlId);
+                    }
                 }
             })
             .catch(() => {});
@@ -229,6 +242,25 @@ const ChatInterface = () => {
             timestamp: new Date(m.created_at),
         }));
         setMessages(loaded);
+        
+        // Find the context of this chat from the first user message
+        const firstUserMessage = loaded.find(m => m.role === 'user');
+        if (firstUserMessage) {
+            const newContext = {
+                source: firstUserMessage.source || 'website',
+                url: firstUserMessage.url || undefined,
+                fileName: firstUserMessage.fileName || undefined
+            };
+            setCurrentContext(newContext);
+            lastContextRef.current = {
+                source: newContext.source,
+                url: newContext.url,
+                file: undefined // The file is lost on reload, but mockFileName will show
+            };
+        }
+        
+        // Update URL to match current chat
+        window.history.replaceState(null, '', `/chat?id=${convoId}`);
     }, []);
 
     const handleSendMessage = useCallback(async (data: {
@@ -270,6 +302,9 @@ const ChatInterface = () => {
                 setActiveConvoId(convo.id);
                 activeConvoIdRef.current = convo.id;
                 setConversations(prev => [convo, ...prev]);
+                
+                // Update URL to reflect the newly created chat
+                window.history.replaceState(null, '', `/chat?id=${convo.id}`);
             }
         }
 
@@ -287,11 +322,18 @@ const ChatInterface = () => {
         }
 
         try {
+            // Include last 4 messages as memory context
+            const history = messages.slice(-4).map(m => ({
+                role: m.role,
+                content: m.content
+            }));
+
             const result = await queryAPI({
                 source: data.source,
                 question,
                 url: data.url,
                 file: data.files?.[0]?.file,
+                history,
             });
 
             const { answer, followUps } = parseResponse(result.answer);
@@ -331,20 +373,42 @@ const ChatInterface = () => {
         }
     }, [isLoggedIn]);
 
-    const handleFollowUp = useCallback((question: string) => {
-        const ctx = lastContextRef.current;
+    const handleFollowUp = useCallback((question: string, msgId: string) => {
+        // Find the assistant message that contains this follow up
+        const msgIndex = messages.findIndex(m => m.id === msgId);
+        let targetSource = lastContextRef.current.source;
+        let targetUrl = lastContextRef.current.url;
+        let targetFile = lastContextRef.current.file;
+
+        // Look backwards for the closest user message to extract its context
+        if (msgIndex > 0) {
+            for (let i = msgIndex - 1; i >= 0; i--) {
+                if (messages[i].role === 'user') {
+                    targetSource = messages[i].source || targetSource;
+                    targetUrl = messages[i].url || targetUrl;
+                    break;
+                }
+            }
+        }
+
+        // Just send it! The backend now supports querying documents from ChromaDB 
+        // without needing the file uploaded again.
         handleSendMessage({
             message: question,
-            files: ctx.file ? [{ file: ctx.file }] : [],
+            files: targetFile ? [{ file: targetFile }] : [],
             pastedContent: [],
-            source: ctx.source,
-            url: ctx.url,
+            source: targetSource,
+            url: targetUrl,
         });
-    }, [handleSendMessage]);
+    }, [handleSendMessage, messages]);
 
     const handleNewChat = () => {
         setMessages([]);
         setActiveConvoId(null);
+        activeConvoIdRef.current = null;
+        lastContextRef.current = { source: 'website' };
+        setCurrentContext({ source: 'website' });
+        window.history.replaceState(null, '', '/chat');
     };
 
     const currentHour = new Date().getHours();
@@ -531,7 +595,12 @@ const ChatInterface = () => {
                             transition={{ duration: 0.5, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
                             className="w-full"
                         >
-                            <AIChatInput onSendMessage={handleSendMessage} />
+                            <AIChatInput 
+                                onSendMessage={handleSendMessage} 
+                                defaultSource={currentContext.source as 'website'|'youtube'|'document'}
+                                defaultUrl={currentContext.url}
+                                defaultFileName={currentContext.fileName}
+                            />
                         </motion.div>
                     </div>
                 )}
@@ -589,7 +658,7 @@ const ChatInterface = () => {
                                                         {msg.followUps.map((q, i) => (
                                                             <button
                                                                 key={i}
-                                                                onClick={() => handleFollowUp(q)}
+                                                                onClick={() => handleFollowUp(q, msg.id)}
                                                                 disabled={isLoading}
                                                                 className="group text-left px-4 py-2.5 rounded-xl text-sm text-zinc-400
                                                                     bg-zinc-900/50 border border-zinc-800 
@@ -634,7 +703,12 @@ const ChatInterface = () => {
 
                         {/* Input pinned to bottom */}
                         <div className="w-full max-w-3xl mx-auto p-4 shrink-0">
-                            <AIChatInput onSendMessage={handleSendMessage} />
+                            <AIChatInput 
+                                onSendMessage={handleSendMessage} 
+                                defaultSource={currentContext.source as 'website'|'youtube'|'document'}
+                                defaultUrl={currentContext.url}
+                                defaultFileName={currentContext.fileName}
+                            />
                         </div>
                     </div>
                 )}

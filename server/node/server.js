@@ -22,8 +22,8 @@ app.use(cors({
 app.use('/api/auth', express.json());
 app.use('/api/query/web', express.json());
 app.use('/api/query/youtube', express.json());
+app.use('/api/query/document', express.json()); // Parses JSON for follow-ups, ignores multipart
 app.use('/api/chat', express.json());
-// /api/query/document intentionally left without body parser — raw stream forwarded
 
 // ── Routes ─────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);

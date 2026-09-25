@@ -29,7 +29,7 @@ export default function Sidebar() {
                                     key={link.href}
                                     link={{
                                         ...link,
-                                        icon: React.cloneElement(link.icon as React.ReactElement, {
+                                        icon: React.cloneElement(link.icon as React.ReactElement<any>, {
                                             className: isActive ? 'text-[#FF6B2C] shrink-0' : 'text-neutral-400 group-hover/sidebar:text-neutral-200 shrink-0'
                                         })
                                     }}
@@ -47,7 +47,7 @@ export default function Sidebar() {
                     <SidebarLink
                         link={{
                             ...SETTINGS_LINK,
-                            icon: React.cloneElement(SETTINGS_LINK.icon as React.ReactElement, {
+                            icon: React.cloneElement(SETTINGS_LINK.icon as React.ReactElement<any>, {
                                 className: pathname === SETTINGS_LINK.href ? 'text-[#FF6B2C] shrink-0' : 'text-neutral-400 group-hover/sidebar:text-neutral-200 shrink-0'
                             })
                         }}

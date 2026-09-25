@@ -57,6 +57,7 @@ def query_web():
 
     url = (data.get("url") or "").strip()
     question = (data.get("question") or "").strip()
+    history = data.get("history") or []
 
     if not url:
         return jsonify({"error": "URL is required"}), 400
@@ -64,7 +65,7 @@ def query_web():
         return jsonify({"error": "Question is required"}), 400
 
     try:
-        answer = web_pipeline(url, question)
+        answer = web_pipeline(url, question, history)
     except Exception as e:
         return jsonify({"error": f"Web pipeline error: {e}"}), 500
 
@@ -80,6 +81,7 @@ def query_youtube():
 
     url = (data.get("url") or "").strip()
     question = (data.get("question") or "").strip()
+    history = data.get("history") or []
 
     if not url:
         return jsonify({"error": "YouTube URL is required"}), 400
@@ -87,7 +89,7 @@ def query_youtube():
         return jsonify({"error": "Question is required"}), 400
 
     try:
-        answer = youtube_pipeline(url, question)
+        answer = youtube_pipeline(url, question, history)
     except Exception as e:
         return jsonify({"error": f"YouTube pipeline error: {e}"}), 500
 
@@ -102,7 +104,31 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_SIZE
 @app.route("/api/query/document", methods=["POST"])
 def query_document():
     """Query an uploaded document (PDF, DOCX, etc.)."""
+    
+    # Check if request is JSON
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+        question = (data.get("question") or "").strip()
+        history = data.get("history") or []
+        
+        if not question:
+            return jsonify({"error": "Question is required"}), 400
+            
+        try:
+            answer = doc_pipeline(None, question, history)
+            return jsonify({"answer": answer, "source": "document"})
+        except Exception as e:
+            return jsonify({"error": f"Document pipeline error: {e}"}), 500
+
+    # Otherwise, it's a multipart form upload
     question = (request.form.get("question") or "").strip()
+    history_str = request.form.get("history") or "[]"
+    import json
+    try:
+        history = json.loads(history_str)
+    except:
+        history = []
+
     if not question:
         return jsonify({"error": "Question is required"}), 400
 
@@ -134,7 +160,7 @@ def query_document():
             tmp.write(content)
             tmp_path = tmp.name
 
-        answer = doc_pipeline(tmp_path, question)
+        answer = doc_pipeline(tmp_path, question, history)
     except Exception as e:
         return jsonify({"error": f"Document pipeline error: {e}"}), 500
     finally:

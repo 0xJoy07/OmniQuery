@@ -9,7 +9,7 @@ const FLASK_BASE_URL = process.env.FLASK_BASE_URL || 'http://localhost:8000';
 // @access  Private
 router.post('/web', protect, async (req, res) => {
     try {
-        const { url, question } = req.body;
+        const { url, question, history } = req.body;
 
         if (!url || !question) {
             return res.status(400).json({ error: 'URL and question are required' });
@@ -18,7 +18,7 @@ router.post('/web', protect, async (req, res) => {
         const response = await fetch(`${FLASK_BASE_URL}/api/query/web`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, question }),
+            body: JSON.stringify({ url, question, history }),
             signal: AbortSignal.timeout(60000),
         });
 
@@ -43,7 +43,7 @@ router.post('/web', protect, async (req, res) => {
 // @access  Private
 router.post('/youtube', protect, async (req, res) => {
     try {
-        const { url, question } = req.body;
+        const { url, question, history } = req.body;
 
         if (!url || !question) {
             return res.status(400).json({ error: 'YouTube URL and question are required' });
@@ -52,7 +52,7 @@ router.post('/youtube', protect, async (req, res) => {
         const response = await fetch(`${FLASK_BASE_URL}/api/query/youtube`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, question }),
+            body: JSON.stringify({ url, question, history }),
             signal: AbortSignal.timeout(60000),
         });
 
@@ -105,7 +105,21 @@ router.post('/document', protect, async (req, res) => {
             return res.json(data);
         }
 
-        return res.status(400).json({ error: 'Document endpoint requires multipart/form-data' });
+        // If it's a JSON request (follow up without file)
+        const { question, history } = req.body;
+        if (question) {
+            const response = await fetch(`${FLASK_BASE_URL}/api/query/document`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question, history }),
+                signal: AbortSignal.timeout(60000),
+            });
+            const data = await response.json();
+            if (!response.ok) return res.status(response.status).json({ error: data.error || data.detail || 'Flask backend error' });
+            return res.json(data);
+        }
+
+        return res.status(400).json({ error: 'Document endpoint requires multipart/form-data or JSON with question' });
     } catch (error) {
         if (error.name === 'TimeoutError' || error.name === 'AbortError') {
             return res.status(504).json({ error: 'Request to Flask backend timed out' });
