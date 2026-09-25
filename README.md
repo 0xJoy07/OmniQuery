@@ -28,7 +28,7 @@
 ## Demo
 
 <p align="center">
-  <video src="video/export-1790355447303.mp4" controls="controls" width="100%" />
+  <video src="video/Omni Query.mp4" controls="controls" width="100%" />
 </p>
 
 ---
