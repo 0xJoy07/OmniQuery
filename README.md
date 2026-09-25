@@ -27,7 +27,7 @@
 
 ## Demo
 
-<p align="center"> <a href="https://drive.google.com/file/d/1GGtMz0UuMRXGo-_8bVlT4tIftpXVpOnB/view?usp=sharing"> Watch the demo on Google Drive </a> </p>
+<p align="center"> <a href="https://drive.google.com/file/d/1HMvaVtCOE4djz0ZnoCt68ITdYp_nBqU4/view?usp=drive_link"> Watch the demo on Google Drive </a> </p>
 
 ---
 
