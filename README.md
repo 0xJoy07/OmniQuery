@@ -27,9 +27,7 @@
 
 ## Demo
 
-<p align="center">
-  (Demo Video Link G-Drive Link)[https://drive.google.com/file/d/1GGtMz0UuMRXGo-_8bVlT4tIftpXVpOnB/view?usp=sharing]
-</p>
+<p align="center"> <a href="https://drive.google.com/file/d/1GGtMz0UuMRXGo-_8bVlT4tIftpXVpOnB/view?usp=sharing"> Watch the demo on Google Drive </a> </p>
 
 ---
 
