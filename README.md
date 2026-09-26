@@ -441,8 +441,8 @@ Please keep PRs focused and include a clear description of what changed and why.
 | Name | Role |
 |------|------|
 | Joy Sengupta | Full-stack development, RAG pipeline |
-| Anushikha Kundu | Contributor |
-| Srijan Mandal | Contributor |
+| Anushikha Kundu | RAG development |
+| Srijan Mandal | RAG development |
 
 ---
 
