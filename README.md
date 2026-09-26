@@ -27,9 +27,20 @@
 
 ## Demo
 
-<p align="center">
-  <video src="video/Omni Query.mp4" controls="controls" width="100%" />
-</p>
+<p align="center"> <a href="https://drive.google.com/file/d/1HMvaVtCOE4djz0ZnoCt68ITdYp_nBqU4/view?usp=drive_link"> Watch the demo on Google Drive </a> </p>
+
+### Screenshots
+
+<table>
+  <tr>
+    <td><img width="100%" alt="Chat view 1" src="https://github.com/user-attachments/assets/b1075866-7b29-4faf-8199-97662b4019c2" /></td>
+    <td><img width="100%" alt="Chat view 2" src="https://github.com/user-attachments/assets/ab83ced8-f05a-4da1-831a-e098c4f8b253" /></td>
+    <td><img width="100%" alt="Chat view 3" src="https://github.com/user-attachments/assets/3544553b-9916-489f-a96e-7fac50311324" /></td>
+  </tr>
+</table>
+
+https://github.com/user-attachments/assets/1f13c2bd-d2ca-43f9-81c5-e8ad2ea645b6
+
 
 ---
 
@@ -430,8 +441,8 @@ Please keep PRs focused and include a clear description of what changed and why.
 | Name | Role |
 |------|------|
 | Joy Sengupta | Full-stack development, RAG pipeline |
-| Anushikha Kundu | Contributor |
-| Srijan Mandal | Contributor |
+| Anushikha Kundu | RAG development |
+| Srijan Mandal | RAG development |
 
 ---
 
