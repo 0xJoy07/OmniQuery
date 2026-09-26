@@ -630,8 +630,8 @@ const ChatInterface = () => {
                                     {msg.role === 'assistant' && (
                                         <div className="max-w-[90%] w-full">
                                             <div className="flex items-start gap-3">
-                                                <div className="mt-1 shrink-0 w-7 h-7 rounded-lg bg-[#FF6B2C]/10 border border-[#FF6B2C]/20 flex items-center justify-center">
-                                                    <Sparkles size={14} className="text-[#FF6B2C]" />
+                                                <div className="mt-1 shrink-0 w-7 h-7 rounded-lg bg-transparent flex items-center justify-center">
+                                                    <img src="https://cdn.21st.dev/assets/mirror/68/6896117aefeca6a69a2ed98a88c9753acdb1e47b0d54b7b4fa63c7ab59e10f5b.png" alt="OmniQuery" className="w-full h-full object-contain drop-shadow-sm" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     {msg.animate ? (
