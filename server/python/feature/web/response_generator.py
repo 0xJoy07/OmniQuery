@@ -18,7 +18,6 @@ def generate_response(question, context_docs, history=[]):
 
     context = "\n\n".join(doc.page_content for doc in context_docs)
     
-    # Format chat history
     formatted_history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in history])
     if not formatted_history:
         formatted_history = "No previous history."
